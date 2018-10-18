@@ -1,0 +1,43 @@
+{
+  "name": "kc-code-2018",
+  "description": "For the Code-A-Thon 2018",
+  "version": "1.0.0",
+  "author": "CSU-Pueblo",
+  "private": true,
+  "scripts": {
+    "frontendDev": "cross-env host=localhost NODE_ENV=development webpack-dev-server --open --hot",
+    "backendDev": "cross-env PORT=8081 NODE_ENV=development nodemon server/server.js",
+    "dev": "concurrently \"npm run frontendDev\" \"npm run backendDev\"",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "prod": "concurrently \"npm run frontendProd\" \"npm run backendProd\"",
+    "frontendProd": "npm run build",
+    "backendProd": "cross-env NODE_ENV=production node server/server.js"
+  },
+  "dependencies": {
+    "vue": "^2.5.3",
+    "vue-router": "^3.0.1",
+    "bootstrap": "^4.0.0-beta.2",
+    "bootstrap-vue": "^1.2.0",
+    "axios": "^0.18.0",
+    "express": "^4.16.4",
+    "connect-history-api-fallback": "^1.5.0",
+    "body-parser": "^1.18.3",
+    "popper.js": "^1.12.9"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^6.0.0",
+    "babel-preset-env": "^1.6.1",
+    "cross-env": "^5.1.1",
+    "css-loader": "^0.28.7",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^1.1.5",
+    "style-loader": "^0.19.0",
+    "vue-loader": "^13.5.0",
+    "vue-template-compiler": "^2.5.3",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.4",
+    "nodemon": "^1.18.4",
+    "concurrently": "^4.0.1"
+  }
+}
