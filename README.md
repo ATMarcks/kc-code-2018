@@ -4,6 +4,8 @@
 
 Alex Marck
 
+Joseph VonFeldt
+
 ## Build Setup
 
 ``` bash
