@@ -7,6 +7,8 @@ Michael Zamora
 
 Joseph VonFeldt
 
+Robin Rice
+
 ## Build Setup
 
 ``` bash
