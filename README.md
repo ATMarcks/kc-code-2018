@@ -6,6 +6,8 @@ Alex Marck
 
 Joseph VonFeldt
 
+Robin Rice
+
 ## Build Setup
 
 ``` bash
