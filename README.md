@@ -3,6 +3,7 @@
 ## Team
 
 Alex Marck
+Michael Zamora
 
 Joseph VonFeldt
 
