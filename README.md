@@ -1,6 +1,8 @@
 # kc-code-2018
 
-> For the Code-A-Thon 2018
+## Team
+
+Alex Marck
 
 ## Build Setup
 
