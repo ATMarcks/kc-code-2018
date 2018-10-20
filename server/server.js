@@ -59,6 +59,8 @@ app.get('/api/gettwitterdata', (req, res) => {
             unreadTweets.push({
                 'time': chunk.time,
                 'text': chunk.text,
+                'id': chunk.id,
+                'screenName': chunk.screenName,
                 'retweets': chunk.retweetCount,
                 'favorites': chunk.favoriteCount
             });
@@ -88,12 +90,16 @@ app.get('/api/gettwitterdata', (req, res) => {
             unreadTweetsToShow.push({
                 'time': new Date(chunk.time).getTime() / 1000,
                 'text': chunk.text,
+                'id': chunk.id,
+                'screenName': chunk.screenName,
                 'retweets': chunk.retweetCount,
                 'favorites': chunk.favoriteCount
             });
             unreadTweets.push({
                 'time': chunk.time,
                 'text': chunk.text,
+                'id': chunk.id,
+                'screenName': chunk.screenName,
                 'retweets': chunk.retweetCount,
                 'favorites': chunk.favoriteCount
             });

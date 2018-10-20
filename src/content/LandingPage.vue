@@ -66,8 +66,10 @@
                         <div v-else>
                             <pie-chart class="chart-inner" style="width: 75%;" :data="[['Positive', twitterContent.semanticScore], ['Negative', 100 - twitterContent.semanticScore]]"></pie-chart>
                             <b-jumbotron class="inside-jumbo" v-for="twitterPost in twitterContent.tweets">
-                                <em>{{ ellipseText(twitterPost.text, 120) }}</em><br /><br />
-                                {{ formatTime(twitterPost.time) }}
+                                <a v-bind:href="'https://twitter.com/'+ twitterPost.screenName+'/status/'+twitterPost.id">
+                                    <em>{{ ellipseText(twitterPost.text, 120) }}</em><br /><br />
+                                    {{ formatTime(twitterPost.time) }}
+                                </a>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
