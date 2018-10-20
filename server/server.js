@@ -2,9 +2,12 @@ let express = require('express');
 let history = require('connect-history-api-fallback');
 let path = require('path');
 let https = require('https');
+let instagram = require('instagram-nodejs-without-api');
 let Sentiment = require('sentiment');
 let scrapeTwitter = require('scrape-twitter');
 let port = process.env.PORT || 80;
+
+Instagram = new instagram();
 
 let app = express();
 let sentiment = new Sentiment();
@@ -146,6 +149,44 @@ app.get('/api/gettumblrdata', (req, res) => {
             'error': 'Could not connect to Tumblr'
         });
     });
+});
+
+app.get('/api/getinstagramdata', (req, res) => {
+    const tag = req.query.tag;
+
+    let semanticAnalysisInstagram = {
+        'samples': 0,
+        'scoreSum': 0
+    };
+
+    Instagram.searchBy('hashtag', tag).then(r => {
+        const postsPreParse = r.entry_data.TagPage[0].graphql.hashtag.edge_hashtag_to_media.edges;
+        let posts = [];
+
+        postsPreParse.forEach(post => {
+           posts.push({
+               'time': post.node.taken_at_timestamp,
+               'text': post.node.edge_media_to_caption.edges[0].node.text || ''
+           });
+        });
+
+        posts.forEach(post => {
+            const senRes = sentiment.analyze(post.text);
+            semanticAnalysisInstagram.samples += 1;
+            semanticAnalysisInstagram.scoreSum += (senRes.score + 5) * 10;
+        });
+
+        res.status(200).send({
+            'success': true,
+            'posts': posts,
+            'semanticScore': semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples,
+        });
+    }).catch(err => {
+        res.status(500).send({
+            'success': false,
+            'message': 'Failed to connect to Instagram'
+        })
+    })
 });
 
 app.listen(port);

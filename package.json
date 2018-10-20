@@ -24,7 +24,8 @@
     "body-parser": "^1.18.3",
     "popper.js": "^1.12.9",
     "scrape-twitter": "^0.11.1",
-    "sentiment": "^5.0.1"
+    "sentiment": "^5.0.1",
+    "instagram-nodejs-without-api": "^1.0.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
