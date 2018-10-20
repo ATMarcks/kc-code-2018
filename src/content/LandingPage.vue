@@ -71,6 +71,7 @@
                             <b-jumbotron class="inside-jumbo" v-for="twitterPost in twitterContent.tweets">
                                 <em>{{ ellipseText(twitterPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(twitterPost.time) }}
+                                <span style="float: right;">&nbsp;<a v-bind:href="'https://twitter.com/'+ twitterPost.screenName+'/status/'+twitterPost.id">[link]</a></span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
