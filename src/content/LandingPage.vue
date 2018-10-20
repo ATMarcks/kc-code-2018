@@ -42,7 +42,7 @@
                                     </b-input-group>
                                 </b-col>
                                 <b-col>
-                                    <b-button style="width: 100%" v-on:click="saveHashtags" variant="success">Save</b-button>
+                                    <b-button style="width: 100%" v-on:click="setDelaySave" variant="success">Save</b-button>
                                 </b-col>
                                 <b-col>
                                     <b-button v-on:click="setDelayCancel" style="width: 100%" variant="danger">Cancel</b-button>
@@ -173,13 +173,20 @@
                 this.updateData()
             },
             setDelay() {
-                this.cogToggledOn = true
-                setTimeout(this.settingsOpened(), 200)
+                this.cogToggledOn = true;
+                setTimeout(this.settingsOpened, 100);
 
             },
             setDelayCancel() {
                 this.settingsCancelled()
-                setTimeout(this.cogToggledOn = false, 1050)
+                setTimeout(this.setCogToggle, 1050)
+            },
+            setDelaySave() {
+                this.saveHashtags()
+                setTimeout(this.setCogToggle, 1050)
+            },
+            setCogToggle() {
+                this.cogToggledOn = false
             },
             settingsOpened() {
                 this.cogToggled = true;
