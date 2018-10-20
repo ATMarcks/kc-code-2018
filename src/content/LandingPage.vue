@@ -177,13 +177,9 @@
                 setTimeout(this.settingsOpened(), 200)
 
             },
-            setCogToggle() {
-                this.cogToggledOn = false
-            },
             setDelayCancel() {
                 this.settingsCancelled()
-
-                setTimeout(this.setCogToggle, 1050)
+                setTimeout(this.cogToggledOn = false, 1050)
             },
             settingsOpened() {
                 this.cogToggled = true;
