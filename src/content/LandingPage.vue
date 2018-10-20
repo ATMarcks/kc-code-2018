@@ -6,9 +6,15 @@
                 <a v-if="!cogToggled" v-on:click="settingsOpened()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
                 <div v-if="cogToggled">
                     <b-row style="width: 100%; float: right;">
-                        <b-col style="margin-top: 8px;">
+                        <b-col>
+                            <b-input-group>
+                                <span style="padding-right: 12px; padding-top: 8px;">Refresh Rate</span>
+                                <b-form-input v-model="refreshRate" type="number" min="5"/>
+                            </b-input-group>
+                        </b-col>
+                        <b-col style="padding-top: 8px; margin-right: -40px; border-left-style: solid;">
                             <input type="checkbox" id="tagCheckbox" name="useAllTag" v-model="sameTagsForAllCheck" v-on:click="sameTagsCheckF($event)"/>
-                            <label for="tagCheckbox">Same tag for all</label>
+                            <label for="tagCheckbox">&nbsp;&nbsp;Same tag for all</label>
                         </b-col>
                         <b-col style="margin-right: 12px;">
                             <b-input-group>
@@ -22,7 +28,7 @@
                                 <b-form-input v-model="twitterTag" placeholder="Hashtag" type="text" />
                             </b-input-group>
                         </b-col>
-                        <b-col  style="margin-right: 12px;">
+                        <b-col  style="padding-right: 12px; border-right-style: solid;">
                             <b-input-group>
                                 <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'tumblr' }"/>
                                 <b-form-input v-model="tumblrTag" placeholder="Hashtag" type="text" />
@@ -51,6 +57,7 @@
                 <b-col v-if="instagramTagInStorage">
                     <b-jumbotron class="sm-containers">
                         <h1>Instagram <span style="color: darkgray; font-size: 36px;"><em>#{{ instagramTagInStorage }}</em></span></h1>
+                        <hr/>
                         <div v-if="instagramLoading && instagramContent.posts.length === 0"><em>&nbsp;Fetching data...</em></div>
                         <div v-else-if="instagramContent.posts.length === 0"><em>&nbsp;No results found -- Instagram tags sometimes require correct capitalization</em></div>
                         <div v-else>
@@ -66,6 +73,7 @@
                 <b-col v-if="twitterTagInStorage">
                     <b-jumbotron class="sm-containers">
                         <h1>Twitter <span style="color: darkgray; font-size: 36px;"><em>#{{ twitterTagInStorage }}</em></span></h1>
+                        <hr/>
                         <div v-if="twitterLoading && twitterContent.tweets.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="twitterContent.tweets.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
@@ -81,6 +89,7 @@
                 <b-col v-if="tumblrTagInStorage">
                     <b-jumbotron class="sm-containers" v-for="">
                         <h1>Tumblr  <span style="color: darkgray; font-size: 36px;"><em>#{{ tumblrTagInStorage }}</em></span></h1>
+                        <hr/>
                         <div v-if="tumblrLoading && tumblrContent.blogs.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="tumblrContent.blogs.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
@@ -110,9 +119,11 @@
                 twitterTag: '', // These three vars are for the views
                 tumblrTag: '',
                 instagramTag: '',
+                refreshRate: 20,
                 twitterTagInStorage: '', // These three reflect the tags in storage
                 tumblrTagInStorage: '',
                 instagramTagInStorage: '',
+                refreshRateInStorage: 20,
                 sameTagsForAllCheck: false,
                 instagramError: false,
                 twitterError: false,
@@ -122,11 +133,13 @@
                 tumblrLoading: false,
                 twitterContent: { 'tweets': [] },
                 tumblrContent: { 'blogs': [] },
-                instagramContent: { 'posts': []}
+                instagramContent: { 'posts': []},
+                refresher: undefined
             }
         },
         methods: {
             saveHashtags() {
+                // This also saves refresh rate
                 this.cogToggled = false
                 this.twitterTagInStorage = this.twitterTag
                 this.instagramTagInStorage = this.instagramTag
@@ -134,13 +147,28 @@
                 localStorage.setItem('twitterTag', this.twitterTag)
                 localStorage.setItem('tumblrTag', this.tumblrTag)
                 localStorage.setItem('instagramTag', this.instagramTag)
-                this.updateData();
+                if (isNaN(this.refreshRate)) {
+                    this.refreshRate = 20
+                } else if (this.refreshRate < 5) {
+                    this.refreshRate = 5
+                }
+
+                this.refreshRateInStorage = this.refreshRate
+                localStorage.setItem('refreshRate', this.refreshRate.toString())
+
+                clearInterval(this.refresher)
+                this.refresher = setInterval(function () {
+                    this.updateData()
+                }.bind(this), this.refreshRateInStorage * 1000)
+
+                this.updateData()
             },
             settingsOpened() {
                 this.cogToggled = true
                 this.twitterTag = localStorage.getItem('twitterTag') || ''
                 this.tumblrTag = localStorage.getItem('tumblrTag') || ''
                 this.instagramTag = localStorage.getItem('instagramTag') || ''
+                this.refreshRate = parseInt(localStorage.getItem('refreshRate')) || 20
             },
             settingsCancelled() {
                 this.cogToggled = false;
@@ -204,12 +232,12 @@
             this.twitterTagInStorage = localStorage.getItem('twitterTag') || ''
             this.tumblrTagInStorage = localStorage.getItem('tumblrTag') || ''
             this.instagramTagInStorage = localStorage.getItem('instagramTag') || ''
+            this.refreshRateInStorage = parseInt(localStorage.getItem('refreshRate')) || 20
 
             this.updateData()
-            setInterval(function () {
-                // Every 10 seconds
+            this.refresher = setInterval(function () {
                 this.updateData()
-            }.bind(this), 20000);
+            }.bind(this), this.refreshRateInStorage * 1000)
         },
         watch: {
             twitterTag: function (newTag) {
