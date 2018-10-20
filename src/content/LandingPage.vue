@@ -50,7 +50,7 @@
                 <b-col v-if="instagramTagInStorage">
                     <b-jumbotron class="sm-containers">
                         <h1>Instagram <span style="color: darkgray; font-size: 36px;"><em>#{{ instagramTagInStorage }}</em></span></h1>
-                        <div v-if="instagramLoading && instagramContent.tweets.length === 0"><em>&nbsp;Fetching data...</em></div>
+                        <div v-if="instagramLoading && instagramContent.posts.length === 0"><em>&nbsp;Fetching data...</em></div>
                         <div v-else-if="instagramContent.posts.length === 0"><em>&nbsp;No results found -- Instagram tags sometimes require correct capitalization</em></div>
                         <div v-else>
                             <pie-chart  class="chart-inner" :data="[['Positive', instagramContent.semanticScore], ['Negative', 100 - instagramContent.semanticScore]]"></pie-chart>
@@ -80,7 +80,7 @@
                 <b-col v-if="tumblrTagInStorage">
                     <b-jumbotron class="sm-containers" v-for="">
                         <h1>Tumblr  <span style="color: darkgray; font-size: 36px;"><em>#{{ tumblrTagInStorage }}</em></span></h1>
-                        <div v-if="tumblrLoading && tumblrContent.tweets.length === 0"><em>&nbsp;Fetching Data...</em></div>
+                        <div v-if="tumblrLoading && tumblrContent.blogs.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="tumblrContent.blogs.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
                             <pie-chart  class="chart-inner" :data="[['Positive', tumblrContent.semanticScore], ['Negative', 100 - tumblrContent.semanticScore]]"></pie-chart>
