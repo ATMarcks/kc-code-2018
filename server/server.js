@@ -175,7 +175,8 @@ app.get('/api/getinstagramdata', (req, res) => {
             if (!checkIfSubstrInStr(post.node.edge_media_to_caption.edges[0].node.text || '', exclude)) {
                 posts.push({
                     'time': post.node.taken_at_timestamp,
-                    'text': post.node.edge_media_to_caption.edges[0].node.text || ''
+                    'text': post.node.edge_media_to_caption.edges[0].node.text || '',
+                    'shortcode': post.node.shortcode
                 });
             }
         });
