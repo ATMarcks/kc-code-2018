@@ -54,9 +54,12 @@
                 </b-jumbotron>
             </b-row>
             <b-row style="width: 100%; margin-right: 0;">
-                <b-col v-if="instagramTagInStorage">
+                <b-col v-if="instagramTagInStorage" col xl="4">
                     <b-jumbotron class="sm-containers">
-                        <h1>Instagram <span style="color: darkgray; font-size: 36px;"><em>#{{ instagramTagInStorage }}</em></span></h1>
+                        <h1>
+                            <font-awesome-icon style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'instagram' }"/>
+                            Instagram <span style="color: darkgray; font-size: 36px; float: right;"><em>#{{ instagramTagInStorage }}</em></span>
+                        </h1>
                         <hr/>
                         <div v-if="instagramLoading && instagramContent.posts.length === 0"><em>&nbsp;Fetching data...</em></div>
                         <div v-else-if="instagramContent.posts.length === 0"><em>&nbsp;No results found -- Instagram tags sometimes require correct capitalization</em></div>
@@ -70,14 +73,17 @@
                         </div>
                     </b-jumbotron>
                 </b-col>
-                <b-col v-if="twitterTagInStorage">
+                <b-col v-if="twitterTagInStorage" col xl="4">
                     <b-jumbotron class="sm-containers">
-                        <h1>Twitter <span style="color: darkgray; font-size: 36px;"><em>#{{ twitterTagInStorage }}</em></span></h1>
+                        <h1>
+                            <font-awesome-icon style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'twitter' }"/>
+                            Twitter <span style="color: darkgray; font-size: 36px; float: right;"><em>#{{ twitterTagInStorage }}</em></span>
+                        </h1>
                         <hr/>
                         <div v-if="twitterLoading && twitterContent.tweets.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="twitterContent.tweets.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
-                            <pie-chart class="chart-inner" style="width: 75%;" :data="[['Positive', twitterContent.semanticScore], ['Negative', 100 - twitterContent.semanticScore]]"></pie-chart>
+                            <pie-chart class="chart-inner" :data="[['Positive', twitterContent.semanticScore], ['Negative', 100 - twitterContent.semanticScore]]"></pie-chart>
                             <b-jumbotron class="inside-jumbo" v-for="twitterPost in twitterContent.tweets">
                                 <em>{{ ellipseText(twitterPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(twitterPost.time) }}
@@ -86,9 +92,11 @@
                         </div>
                     </b-jumbotron>
                 </b-col>
-                <b-col v-if="tumblrTagInStorage">
+                <b-col v-if="tumblrTagInStorage" col xl="4">
                     <b-jumbotron class="sm-containers" v-for="">
-                        <h1>Tumblr  <span style="color: darkgray; font-size: 36px;"><em>#{{ tumblrTagInStorage }}</em></span></h1>
+                        <h1>
+                            <font-awesome-icon style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'tumblr' }"/>
+                            Tumblr  <span style="color: darkgray; font-size: 36px; float: right;"><em>#{{ tumblrTagInStorage }}</em></span></h1>
                         <hr/>
                         <div v-if="tumblrLoading && tumblrContent.blogs.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="tumblrContent.blogs.length === 0"><em>&nbsp;No results found</em></div>
@@ -217,7 +225,7 @@
                 }
             },
             formatTime(utcepoch) {
-              return moment.unix(utcepoch).format('MMMM Do, YYYY h:mm A')
+              return moment.unix(utcepoch).format('MMMM Do, h:mm A')
             },
             sameTagsCheckF(event) {
                 if (event.target.checked) this.twitterTag = this.tumblrTag = this.instagramTag = ''
@@ -266,6 +274,7 @@
     .inside-jumbo {
         background-color: lightgray;
         padding: 12px;
+        overflow:hidden;
     }
 
     .chart-inner {
