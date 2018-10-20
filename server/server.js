@@ -12,6 +12,8 @@ Instagram = new instagram();
 let app = express();
 let sentiment = new Sentiment();
 
+const exclude = ['win', 'giveaway']
+
 // Allow CORS if in development
 // Serve static files if in prod
 if (process.env.NODE_ENV === 'development') {
@@ -51,12 +53,15 @@ app.get('/api/gettwitterdata', (req, res) => {
     };
 
     newTweets.on('data', (chunk) => {
-        unreadTweets.push({
+        if (!checkIfSubstrInStr(chunk.text, exclude)) {
+            unreadTweets.push({
                 'time': chunk.time,
                 'text': chunk.text,
                 'retweets': chunk.retweetCount,
                 'favorites': chunk.favoriteCount
             });
+        }
+
         if (unreadTweets.length === 150) {
             newTweets.destroy();
             topTweets.destroy();
@@ -67,25 +72,28 @@ app.get('/api/gettwitterdata', (req, res) => {
             });
             unreadTweetsToShow = unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9);
             res.status(200).send({
-                'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
-                'tweets': unreadTweetsToShow
+                'semanticScore': semanticAnalysisTwitter.scoreSum / semanticAnalysisTwitter.samples,
+                'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9)
             })
         }
     });
 
     topTweets.on('data', (chunk) => {
-        unreadTweetsToShow.push({
-            'time': new Date(chunk.time).getTime() / 1000,
-            'text': chunk.text,
-            'retweets': chunk.retweetCount,
-            'favorites': chunk.favoriteCount
-        });
-        unreadTweets.push({
-            'time': chunk.time,
-            'text': chunk.text,
-            'retweets': chunk.retweetCount,
-            'favorites': chunk.favoriteCount
-        });
+        if (!checkIfSubstrInStr(chunk.text, exclude)) {
+            unreadTweetsToShow.push({
+                'time': new Date(chunk.time).getTime() / 1000,
+                'text': chunk.text,
+                'retweets': chunk.retweetCount,
+                'favorites': chunk.favoriteCount
+            });
+            unreadTweets.push({
+                'time': chunk.time,
+                'text': chunk.text,
+                'retweets': chunk.retweetCount,
+                'favorites': chunk.favoriteCount
+            });
+        }
+
         if (unreadTweets.length === 150) {
             newTweets.destroy();
             topTweets.destroy();
@@ -94,11 +102,10 @@ app.get('/api/gettwitterdata', (req, res) => {
                 semanticAnalysisTwitter.samples += 1;
                 semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
             });
-            unreadTweetsToShow = unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9);
             res.status(200).send({
                 'success': true,
                 'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
-                'tweets': unreadTweetsToShow
+                'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9)
             })
         }
     });
@@ -126,12 +133,12 @@ app.get('/api/gettumblrdata', (req, res) => {
         resp.on('end', () => {
             let resObj = JSON.parse(resJson);
             resObj.response.forEach(post => {
-                if (post.body) {
+                if (post.body && !checkIfSubstrInStr(post.body, exclude)) {
                     tumblrPosts.push({
                         'time': post.timestamp,
                         'text': post.body
                     });
-                    const senRes = sentiment.analyze(post.summary);
+                    const senRes = sentiment.analyze(post.body);
                     semanticAnalysisTumblr.samples += 1;
                     semanticAnalysisTumblr.scoreSum += (senRes.score + 5) * 10;
                 }
@@ -140,11 +147,11 @@ app.get('/api/gettumblrdata', (req, res) => {
             res.status(200).send({
                 'success': true,
                 'semanticScore': semanticAnalysisTumblr.scoreSum/ semanticAnalysisTumblr.samples,
-                'blogs': tumblrPosts
+                'blogs': tumblrPosts.sort(() => .5 - Math.random()).slice(0,9)
             });
         });
     }).on('error', (err) => {
-        res.status(200).send({
+        res.status(500).send({
             'success': false,
             'error': 'Could not connect to Tumblr'
         });
@@ -164,10 +171,12 @@ app.get('/api/getinstagramdata', (req, res) => {
         let posts = [];
 
         postsPreParse.forEach(post => {
-           posts.push({
-               'time': post.node.taken_at_timestamp,
-               'text': post.node.edge_media_to_caption.edges[0].node.text || ''
-           });
+            if (!checkIfSubstrInStr(post.node.edge_media_to_caption.edges[0].node.text || '', exclude)) {
+                posts.push({
+                    'time': post.node.taken_at_timestamp,
+                    'text': post.node.edge_media_to_caption.edges[0].node.text || ''
+                });
+            }
         });
 
         posts.forEach(post => {
@@ -178,7 +187,7 @@ app.get('/api/getinstagramdata', (req, res) => {
 
         res.status(200).send({
             'success': true,
-            'posts': posts,
+            'posts': posts.sort(() => .5 - Math.random()).slice(0,9),
             'semanticScore': semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples,
         });
     }).catch(err => {
@@ -188,5 +197,12 @@ app.get('/api/getinstagramdata', (req, res) => {
         })
     })
 });
+
+function checkIfSubstrInStr(str, strArray) {
+    for (let substr in strArray) {
+        if (str.toLowerCase().includes(substr)) return true;
+    }
+    return false;
+}
 
 app.listen(port);

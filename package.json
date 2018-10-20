@@ -25,7 +25,14 @@
     "popper.js": "^1.12.9",
     "scrape-twitter": "^0.11.1",
     "sentiment": "^5.0.1",
-    "instagram-nodejs-without-api": "^1.0.3"
+    "instagram-nodejs-without-api": "^1.0.3",
+    "@fortawesome/fontawesome-svg-core": "^1.2.6",
+    "@fortawesome/free-solid-svg-icons": "^5.4.1",
+    "@fortawesome/vue-fontawesome": "^0.1.1",
+    "@fortawesome/fontawesome-free-brands": "^5.0.13",
+    "moment": "^2.22.2",
+    "chart.js": "^2.7.3",
+    "vue-chartkick": "^0.5.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
