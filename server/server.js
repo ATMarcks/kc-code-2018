@@ -61,8 +61,8 @@ app.get('/api/gettwitterdata', (req, res) => {
                 'text': chunk.text,
                 'id': chunk.id,
                 'screenName': chunk.screenName,
-                'retweets': chunk.retweetCount,
-                'favorites': chunk.favoriteCount
+                'retweetCount': chunk.retweetCount,
+                'favoriteCount': chunk.favoriteCount
             });
         }
 
@@ -92,16 +92,16 @@ app.get('/api/gettwitterdata', (req, res) => {
                 'text': chunk.text,
                 'id': chunk.id,
                 'screenName': chunk.screenName,
-                'retweets': chunk.retweetCount,
-                'favorites': chunk.favoriteCount
+                'retweetCount': chunk.retweetCount,
+                'favoriteCount': chunk.favoriteCount
             });
             unreadTweets.push({
                 'time': chunk.time,
                 'text': chunk.text,
                 'id': chunk.id,
                 'screenName': chunk.screenName,
-                'retweets': chunk.retweetCount,
-                'favorites': chunk.favoriteCount
+                'retweetCount': chunk.retweetCount,
+                'favoriteCount': chunk.favoriteCount
             });
         }
 
@@ -137,7 +137,8 @@ app.get('/api/gettumblrdata', (req, res) => {
                     tumblrPosts.push({
                         'time': post.timestamp,
                         'text': post.body,
-                        'short_url': post.short_url
+                        'short_url': post.short_url,
+                        'note_count': post.note_count
                     });
                     const senRes = sentiment.analyze((post.body || '').replace('#', ''));
                     semanticAnalysisTumblr.samples += 1;
@@ -176,7 +177,8 @@ app.get('/api/getinstagramdata', (req, res) => {
                 posts.push({
                     'time': post.node.taken_at_timestamp,
                     'text': post.node.edge_media_to_caption.edges[0].node.text || '',
-                    'shortcode': post.node.shortcode
+                    'shortcode': post.node.shortcode,
+                    'edge_liked_by': post.node.edge_liked_by.count
                 });
             }
         });

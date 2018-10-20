@@ -58,7 +58,9 @@
                             <b-jumbotron class="inside-jumbo" v-for="instagramPost in instagramContent.posts">
                                 <em>{{ ellipseText(instagramPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(instagramPost.time) }}
+                                <br/>
                                 <span style="float: right;">&nbsp;<a v-bind:href="'https://www.instagram.com/p/'+instagramPost.shortcode+'/'">[link]</a></span>
+                                <span>[Likes: {{instagramPost.edge_liked_by}}]</span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
@@ -73,7 +75,9 @@
                             <b-jumbotron class="inside-jumbo" v-for="twitterPost in twitterContent.tweets">
                                 <em>{{ ellipseText(twitterPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(twitterPost.time) }}
+                                <br/>
                                 <span style="float: right;">&nbsp;<a v-bind:href="'https://twitter.com/'+ twitterPost.screenName+'/status/'+twitterPost.id">[link]</a></span>
+                                <span>[Retweets: {{twitterPost.retweetCount}} Likes: {{twitterPost.favoriteCount}}]</span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
@@ -88,7 +92,9 @@
                             <b-jumbotron class="inside-jumbo" v-for="tumblrPost in tumblrContent.blogs">
                                 <em>{{ ellipseText(tumblrPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(tumblrPost.time) }}
+                                <br/>
                                 <span style="float: right;">&nbsp;<a v-bind:href="tumblrPost.short_url">[link]</a></span>
+                                <span>[Notes: {{tumblrPost.note_count}}]</span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
