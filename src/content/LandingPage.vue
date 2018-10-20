@@ -7,6 +7,10 @@
                     <b-jumbotron header="Twitter" class="sm-containers">
                         <p>twitter content here</p>
                     </b-jumbotron>
+                    <b-button v-bind:onclick="getTwitterData"></b-button>
+                        <b-jumbotron v-for="tweet in tweets" header="tweet" class="sm-containers">
+                            <p>{{ tweet.text }}</p>
+                        </b-jumbotron>
                 </b-col>
                 <b-col>
                     <b-jumbotron header="Facebook" class="sm-containers">
@@ -24,31 +28,46 @@
 </template>
 
 <script>
-import http from '../shared/http'
+    import http from '../shared/http'
 
-export default {
-  name: "LandingPage",
-  data () {
-    return {
-      twitterHashtag: ''
+    export default {
+        name: "LandingPage",
+        data() {
+            return {
+                twitterHashtag: '',
+                tumblrTag: '',
+                tweets: ['',''],
+                blogs: []
+            }
+        },
+        methods: {
+            getTwitterData() {
+                http.get('/gettwitterdata?hashtag=' + 'cancer').then(response => {
+                    this.tweets = response.data.tweets;
+                    this.tweets.forEach(tweet => {
+                        console.log(tweet.text);
+                    })
+                }).catch(() => {
+                    console.log('Failed To Retrieve Tweets');
+                    this.tweets = [];
+                })
+            },
+            getTumblerData(tag) {
+                http.get('/gettumblrdata?tag=' + tag).then(response => {
+
+                }).catch(() => {
+                    this.successStatus = 'Backend is not working'
+                })
+
+            }
+        },
+        mounted() {
+        },
     }
-  },
-  methods: {
-      getTwitterData (hashtag) {
-          http.get('/gettwitterdata?hashtag=' + hashtag).then(response => {
-              this.successStatus = response.data
-          }).catch(() => {
-              this.successStatus = 'Backend is not working'
-          })
-      }
-  },
-  mounted () {
-  },
-}
 </script>
 
 <style scoped>
-.sm-containers {
-    padding-top: 32px;
-}
+    .sm-containers {
+        padding-top: 32px;
+    }
 </style>
