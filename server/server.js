@@ -2,11 +2,13 @@ let express = require('express')
 let history = require('connect-history-api-fallback')
 let path = require('path')
 let Sentiment = require('sentiment');
-let scrapeTwitter = require('scrape-twitter')
+let scrapeTwitter = require('scrape-twitter');
+let Instagram = require('instagram-nodejs-without-api');
 let port = process.env.PORT || 80
 
 let app = express()
 let sentiment = new Sentiment();
+Instagram = new Instagram()
 
 // Allow CORS if in development
 // Serve static files if in prod
