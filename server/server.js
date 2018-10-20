@@ -149,7 +149,7 @@ app.get('/api/gettumblrdata', (req, res) => {
                 }
             });
 
-            let averageNoteCount = note_count/150;
+            let averageNoteCount = Math.round(note_count / tumblrPosts.length * 100) / 100;
 
             res.status(200).send({
                 'success': true,
@@ -199,7 +199,7 @@ app.get('/api/getinstagramdata', (req, res) => {
             semanticAnalysisInstagram.scoreSum += (senRes.score + 5) * 10;
         });
 
-        let averageLikes = numberOfLikes/150;
+        let averageLikes = Math.round(numberOfLikes / posts.length * 100) / 100;
 
         res.status(200).send({
             'success': true,
@@ -239,8 +239,8 @@ function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTwee
         numberOfRetweets += tweet.retweetCount;
     });
 
-    let averageLikes = numberOfLikes/150;
-    let averageRetweets = numberOfRetweets/150;
+    let averageLikes = Math.round(numberOfLikes / unreadTweets.length * 100) / 100;
+    let averageRetweets = Math.round(numberOfRetweets / unreadTweets.length * 100) / 100;
 
     try {
         res.status(200).send({
