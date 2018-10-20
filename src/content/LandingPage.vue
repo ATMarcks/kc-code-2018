@@ -1,6 +1,6 @@
 <template>
     <div style="width: 100%;">
-        <b-navbar toggleable="md" style="margin-bottom: 24px;" variant="dark">
+        <b-navbar toggleable="md" style="margin-bottom: 0px;" variant="dark">
             <b-navbar-brand style="color: white">Sentiment</b-navbar-brand>
             <b-navbar-nav class="ml-auto" style="color: white;">
                 <a v-if="!cogToggled" v-on:click="settingsOpened()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
@@ -34,8 +34,14 @@
                 </div>
             </b-navbar-nav>
         </b-navbar>
-        <b-container style="width: 100%;"> <!-- add margins here for more space -->
-            <b-row>
+        <b-container style="padding: 30px;" fluid> <!-- add margins here for more space -->
+            <b-row style="width: 100%;">
+                <b-jumbotron style="margin-left: 15px; width: 100%;" class="sm-containers">
+                    <h1>Welcome to Sentiment</h1>
+                    <p></p>
+                </b-jumbotron>
+            </b-row>
+            <b-row style="width: 100%;">
                 <b-col>
                     <b-jumbotron header="Instagram" class="sm-containers">
                         <div v-if="instagramContent.length === 0">
@@ -66,7 +72,7 @@
                 </b-col>
                 <b-col>
                     <b-jumbotron header="Tumblr" class="sm-containers" v-for="">
-                        <div v-if="tumblrContent.length === 0">
+                        <div v-if="tumblrContent.blogs.length === 0">
                             You don't have any Tumblr data - you can select a hashtag to follow by clicking the cog in the top right.
                         </div>
                         <div v-else>
@@ -187,5 +193,9 @@
 
     .chart-inner {
         margin-bottom: 15px;
+    }
+
+    h1 {
+        font-size: 80px;
     }
 </style>

@@ -42,6 +42,8 @@ app.get('/api/test', (req, res) => {
 app.get('/api/gettwitterdata', (req, res) => {
     let unreadTweets = []; // Clear out our tweets
     let unreadTweetsToShow = [];
+    let topTweetsEnd = false;
+    let newTweetsEnd = false;
 
     const hashtag = req.query.hashtag;
     let topTweets = new scrapeTwitter.TweetStream('#' + hashtag, 'top', 100);
@@ -63,18 +65,21 @@ app.get('/api/gettwitterdata', (req, res) => {
         }
 
         if (unreadTweets.length === 150) {
-            newTweets.destroy();
-            topTweets.destroy();
-            unreadTweets.forEach(tweet => {
-                const senRes = sentiment.analyze(tweet.text);
-                semanticAnalysisTwitter.samples += 1;
-                semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
-            });
-            unreadTweetsToShow = unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9);
-            res.status(200).send({
-                'semanticScore': semanticAnalysisTwitter.scoreSum / semanticAnalysisTwitter.samples,
-                'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9)
-            })
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
+        }
+    });
+
+    newTweets.on('end', () => {
+        newTweetsEnd = true;
+        if (topTweetsEnd) {
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
+        }
+    });
+
+    topTweets.on('end', () => {
+        topTweetsEnd = true;
+        if (newTweetsEnd) {
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
         }
     });
 
@@ -95,18 +100,7 @@ app.get('/api/gettwitterdata', (req, res) => {
         }
 
         if (unreadTweets.length === 150) {
-            newTweets.destroy();
-            topTweets.destroy();
-            unreadTweets.forEach(tweet => {
-                const senRes = sentiment.analyze(tweet.text);
-                semanticAnalysisTwitter.samples += 1;
-                semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
-            });
-            res.status(200).send({
-                'success': true,
-                'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
-                'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9)
-            })
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
         }
     });
 });
@@ -203,6 +197,21 @@ function checkIfSubstrInStr(str, strArray) {
         if (str.toLowerCase().includes(substr)) return true;
     }
     return false;
+}
+
+function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res) {
+    newTweetsStream.destroy();
+    topTweetsStream.destroy();
+    unreadTweets.forEach(tweet => {
+        const senRes = sentiment.analyze(tweet.text);
+        semanticAnalysisTwitter.samples += 1;
+        semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
+    });
+    res.status(200).send({
+        'success': true,
+        'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
+        'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9)
+    })
 }
 
 app.listen(port);
