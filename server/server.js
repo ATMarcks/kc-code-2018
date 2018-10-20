@@ -136,7 +136,8 @@ app.get('/api/gettumblrdata', (req, res) => {
                 if (post.body && !checkIfSubstrInStr(post.body, exclude)) {
                     tumblrPosts.push({
                         'time': post.timestamp,
-                        'text': post.body
+                        'text': post.body,
+                        'short_url': post.short_url
                     });
                     const senRes = sentiment.analyze((post.body || '').replace('#', ''));
                     semanticAnalysisTumblr.samples += 1;

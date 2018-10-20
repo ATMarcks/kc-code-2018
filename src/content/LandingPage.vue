@@ -86,6 +86,7 @@
                             <b-jumbotron class="inside-jumbo" v-for="tumblrPost in tumblrContent.blogs">
                                 <em>{{ ellipseText(tumblrPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(tumblrPost.time) }}
+                                <span style="float: right;">&nbsp;<a v-bind:href="tumblrPost.short_url">[link]</a></span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
