@@ -2,32 +2,35 @@
     <div style="width: 100%;">
         <b-navbar toggleable="md" style="margin-bottom: 0px;" variant="dark">
             <b-navbar-brand style="color: white">Sentiment</b-navbar-brand>
-            <b-navbar-nav class="ml-auto" style="color: white;">
+            <b-navbar-nav class="ml-auto" style="color: white;  margin-left: 0px;">
                 <a v-if="!cogToggled" v-on:click="settingsOpened()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
                 <div v-if="cogToggled">
                     <b-row style="width: 100%; float: right;">
-                        <b-col cols="2" style="margin-right: 12px;">
+                        <b-col style="margin-right: 12px;">
+                            <input type="checkbox"> Same tags
+                        </b-col>
+                        <b-col style="margin-right: 12px;">
                             <b-input-group>
                                 <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'instagram' }"/>
                                 <b-form-input v-model="instagramTag" placeholder="Hashtag" type="text" />
                             </b-input-group>
                         </b-col>
-                        <b-col cols="2" style="margin-right: 12px;">
+                        <b-col style="margin-right: 12px;">
                             <b-input-group>
                                 <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'twitter' }"/>
                                 <b-form-input v-model="twitterTag" placeholder="Hashtag" type="text" />
                             </b-input-group>
                         </b-col>
-                        <b-col cols="2" style="margin-right: 12px;">
+                        <b-col  style="margin-right: 12px;">
                             <b-input-group>
                                 <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'tumblr' }"/>
                                 <b-form-input v-model="tumblrTag" placeholder="Hashtag" type="text" />
                             </b-input-group>
                         </b-col>
-                        <b-col cols="2">
+                        <b-col>
                             <b-button style="width: 100%" v-on:click="saveHashtags" variant="success">Save</b-button>
                         </b-col>
-                        <b-col cols="2">
+                        <b-col>
                             <b-button v-on:click="settingsCancelled" style="width: 100%" variant="danger">Cancel</b-button>
                         </b-col>
                     </b-row>

@@ -132,7 +132,7 @@ app.get('/api/gettumblrdata', (req, res) => {
                         'time': post.timestamp,
                         'text': post.body
                     });
-                    const senRes = sentiment.analyze(post.body);
+                    const senRes = sentiment.analyze((post.body || '').replace('#', ''));
                     semanticAnalysisTumblr.samples += 1;
                     semanticAnalysisTumblr.scoreSum += (senRes.score + 5) * 10;
                 }
@@ -174,7 +174,7 @@ app.get('/api/getinstagramdata', (req, res) => {
         });
 
         posts.forEach(post => {
-            const senRes = sentiment.analyze(post.text);
+            const senRes = sentiment.analyze((post.text || '').replace('#', ''));
             semanticAnalysisInstagram.samples += 1;
             semanticAnalysisInstagram.scoreSum += (senRes.score + 5) * 10;
         });
@@ -203,7 +203,7 @@ function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTwee
     newTweetsStream.destroy();
     topTweetsStream.destroy();
     unreadTweets.forEach(tweet => {
-        const senRes = sentiment.analyze(tweet.text);
+        const senRes = sentiment.analyze((tweet.text || '').replace('#', ''));
         semanticAnalysisTwitter.samples += 1;
         semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
     });
