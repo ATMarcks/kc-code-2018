@@ -1,14 +1,13 @@
 <template>
     <div style="width: 100%;">
         <b-navbar toggleable="md" style="margin-bottom: 0px;" variant="dark">
-            <b-navbar-brand style="color: white">Sentiment</b-navbar-brand>
+            <b-navbar-brand style="color: white"><font-awesome-icon icon="comments"/>&nbsp;&nbsp;Sentiment</b-navbar-brand>
             <b-navbar-nav class="ml-auto" style="color: white;  margin-left: 0px;">
                 <transition name="custom-classes-tran" enter-active-class="animated fadeInRight">
                     <a v-if="!cogToggledOn" v-on:click="setDelay()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
                 </transition>
                 <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
-                <transition
-                            name="custom-classes-transition"
+                <transition name="custom-classes-transition"
                             enter-active-class="animated fadeInRight"
                             leave-active-class="animated fadeOutRight">
                         <div v-if="cogToggled">
