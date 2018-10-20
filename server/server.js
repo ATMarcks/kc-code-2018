@@ -1,13 +1,12 @@
 let express = require('express')
 let history = require('connect-history-api-fallback')
 let path = require('path')
-let http = require('http');
+let Sentiment = require('sentiment');
 let scrapeTwitter = require('scrape-twitter')
 let port = process.env.PORT || 80
 
-let unreadTweets = [];
-
 let app = express()
+let sentiment = new Sentiment();
 
 // Allow CORS if in development
 // Serve static files if in prod
@@ -35,16 +34,69 @@ app.get('/api/test', (req, res) => {
 })
 
 app.get('/api/gettwitterdata', (req, res) => {
-    const hashtag = req.query.hashtag;
-    let tweets = new scrapeTwitter.TweetStream('#' + hashtag, 'latest', 50);
+    let unreadTweets = []; // Clear out our tweets
+    let unreadTweetsToShow = [];
 
-    tweets.on('data', (chunk) => {
-        console.log(chunk);
-        // writable.write(chunk);
+    const hashtag = req.query.hashtag;
+    let topTweets = new scrapeTwitter.TweetStream('#' + hashtag, 'top', 100);
+    let newTweets = new scrapeTwitter.TweetStream('#' + hashtag, 'latest', 100);
+
+    let semanticAnalysisTwitter = {
+        'samples': 0,
+        'scoreSum': 0
+    };
+
+    newTweets.on('data', (chunk) => {
+        unreadTweets.push({
+                'time': chunk.time,
+                'text': chunk.text,
+                'retweets': chunk.retweetCount,
+                'favorites': chunk.favoriteCount
+            });
+        if (unreadTweets.length === 150) {
+            newTweets.destroy();
+            topTweets.destroy();
+            unreadTweets.forEach(tweet => {
+                const senRes = sentiment.analyze(tweet.text);
+                semanticAnalysisTwitter.samples += 1;
+                semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
+            });
+            unreadTweetsToShow = unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9);
+            res.status(200).send({
+                'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
+                'tweets': unreadTweetsToShow
+            })
+        }
     });
 
-    let read = tweets.read();
-    console.log(read);
+    topTweets.on('data', (chunk) => {
+        unreadTweetsToShow.push({
+            'time': chunk.time,
+            'text': chunk.text,
+            'retweets': chunk.retweetCount,
+            'favorites': chunk.favoriteCount
+        });
+        unreadTweets.push({
+            'time': chunk.time,
+            'text': chunk.text,
+            'retweets': chunk.retweetCount,
+            'favorites': chunk.favoriteCount
+        });
+        if (unreadTweets.length === 150) {
+            newTweets.destroy();
+            topTweets.destroy();
+            unreadTweets.forEach(tweet => {
+                const senRes = sentiment.analyze(tweet.text);
+                semanticAnalysisTwitter.samples += 1;
+                semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
+            });
+            unreadTweetsToShow = unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9);
+            res.status(200).send({
+                'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
+                'tweets': unreadTweetsToShow
+            })
+        }
+    });
 });
 
 app.listen(port)
