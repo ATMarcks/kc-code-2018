@@ -25,7 +25,7 @@ Our application, Sentiment, addresses the problem of how businesses and organiza
 on social media about a certain topic. Evaluating general public sentiment online can be time-consuming, difficult to quantitate, or require custom
 or highly specific software. Sentiment uses sentiment analysis, a process in which a positive or negative score is assigned to a number of recent
 social media posts surrounding a specific topic and the scores aggregated. For example, polarizing words such as _awful_ or _great_
-lower the raise the positivity score, respectively.
+lower or raise the positivity score, respectively.
 
 With Sentiment a business can quickly get a real-time snapshot of
 public sentiment around a certain topic by typing in a hashtag. Our application also
