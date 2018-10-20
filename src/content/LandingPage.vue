@@ -35,18 +35,20 @@
             </b-navbar-nav>
         </b-navbar>
         <b-container style="padding: 30px;" fluid> <!-- add margins here for more space -->
-            <b-row style="width: 100%;">
-                <b-jumbotron style="margin-left: 15px; width: 100%;" class="sm-containers">
+            <b-row style="width: 100%; margin-right: 0;">
+                <b-jumbotron v-if="!twitterTagInStorage && !tumblrTagInStorage && !instagramTagInStorage" style="margin-left: 15px; width: 100%;" class="sm-containers">
                     <h1>Welcome to Sentiment</h1>
+                    <h3>Sentiment uses sentiment analysis to get the general positive and negative sentiment of a
+                        certain hashtag by social media users. Click on the cog on the top right to get started.</h3>
                     <p></p>
                 </b-jumbotron>
             </b-row>
-            <b-row style="width: 100%;">
-                <b-col>
-                    <b-jumbotron header="Instagram" class="sm-containers">
-                        <div v-if="instagramContent.length === 0">
-                            You don't have any Instagram data - select a hashtag to follow by clicking the cog in the top right.
-                        </div>
+            <b-row style="width: 100%; margin-right: 0;">
+                <b-col v-if="instagramTagInStorage">
+                    <b-jumbotron class="sm-containers">
+                        <h1>Instagram <span style="color: darkgray; font-size: 36px;"><em>#{{ instagramTagInStorage }}</em></span></h1>
+                        <div v-if="instagramLoading && instagramContent.tweets.length === 0"><em>&nbsp;Fetching data...</em></div>
+                        <div v-else-if="instagramContent.posts.length === 0"><em>&nbsp;No results found -- Instagram tags sometimes require correct capitalization</em></div>
                         <div v-else>
                             <pie-chart  class="chart-inner" :data="[['Positive', instagramContent.semanticScore], ['Negative', 100 - instagramContent.semanticScore]]"></pie-chart>
                             <b-jumbotron class="inside-jumbo" v-for="instagramPost in instagramContent.posts">
@@ -56,11 +58,11 @@
                         </div>
                     </b-jumbotron>
                 </b-col>
-                <b-col>
-                    <b-jumbotron header="Twitter" class="sm-containers">
-                        <div v-if="twitterContent.length === 0">
-                            You don't have any Twitter data - you can select a hashtag to follow by clicking the cog in the top right.
-                        </div>
+                <b-col v-if="twitterTagInStorage">
+                    <b-jumbotron class="sm-containers">
+                        <h1>Twitter <span style="color: darkgray; font-size: 36px;"><em>#{{ twitterTagInStorage }}</em></span></h1>
+                        <div v-if="twitterLoading && twitterContent.tweets.length === 0"><em>&nbsp;Fetching Data...</em></div>
+                        <div v-else-if="twitterContent.tweets.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
                             <pie-chart class="chart-inner" style="width: 75%;" :data="[['Positive', twitterContent.semanticScore], ['Negative', 100 - twitterContent.semanticScore]]"></pie-chart>
                             <b-jumbotron class="inside-jumbo" v-for="twitterPost in twitterContent.tweets">
@@ -70,11 +72,11 @@
                         </div>
                     </b-jumbotron>
                 </b-col>
-                <b-col>
-                    <b-jumbotron header="Tumblr" class="sm-containers" v-for="">
-                        <div v-if="tumblrContent.blogs.length === 0">
-                            You don't have any Tumblr data - you can select a hashtag to follow by clicking the cog in the top right.
-                        </div>
+                <b-col v-if="tumblrTagInStorage">
+                    <b-jumbotron class="sm-containers" v-for="">
+                        <h1>Tumblr  <span style="color: darkgray; font-size: 36px;"><em>#{{ tumblrTagInStorage }}</em></span></h1>
+                        <div v-if="tumblrLoading && tumblrContent.tweets.length === 0"><em>&nbsp;Fetching Data...</em></div>
+                        <div v-else-if="tumblrContent.blogs.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
                             <pie-chart  class="chart-inner" :data="[['Positive', tumblrContent.semanticScore], ['Negative', 100 - tumblrContent.semanticScore]]"></pie-chart>
                             <b-jumbotron class="inside-jumbo" v-for="tumblrPost in tumblrContent.blogs">
@@ -98,17 +100,29 @@
         data() {
             return {
                 cogToggled: false,
-                twitterTag: '',
+                twitterTag: '', // These three vars are for the views
                 tumblrTag: '',
                 instagramTag: '',
-                twitterContent: [],
-                tumblrContent: [],
-                instagramContent: []
+                twitterTagInStorage: '', // These three reflect the tags in storage
+                tumblrTagInStorage: '',
+                instagramTagInStorage: '',
+                instagramError: false,
+                twitterError: false,
+                tumblrError: false,
+                instagramLoading: false,
+                twitterLoading: false,
+                tumblrLoading: false,
+                twitterContent: { 'tweets': [] },
+                tumblrContent: { 'blogs': [] },
+                instagramContent: { 'posts': []}
             }
         },
         methods: {
             saveHashtags() {
                 this.cogToggled = false
+                this.twitterTagInStorage = this.twitterTag
+                this.instagramTagInStorage = this.instagramTag
+                this.tumblrTagInStorage = this.tumblrTag
                 localStorage.setItem('twitterTag', this.twitterTag)
                 localStorage.setItem('tumblrTag', this.tumblrTag)
                 localStorage.setItem('instagramTag', this.instagramTag)
@@ -127,25 +141,36 @@
                 this.instagramTag = localStorage.getItem('instagramTag') || ''
             },
             getTwitterData(tag) {
+                this.twitterLoading = true
                 http.get('/gettwitterdata?hashtag=' + tag).then(response => {
-                    this.twitterContent = response.data;
+                    this.twitterContent = response.data
+                    this.twitterError = false
+                    this.twitterLoading = false
                 }).catch(() => {
-                    console.log('Failed To Retrieve Tweets');
-                    this.twitterContent = [];
+                    this.twitterError = true
+                    this.twitterLoading = false
                 })
             },
             getTumblrData(tag) {
+                this.tumblrLoading = true
                 http.get('/gettumblrdata?tag=' + tag).then(response => {
-                    this.tumblrContent = response.data;
+                    this.tumblrContent = response.data
+                    this.tumblrError = false
+                    this.tumblrLoading = false
                 }).catch(() => {
-                    this.successStatus = 'Backend is not working'
+                    this.tumblrError = true
+                    this.tumblrLoading = false
                 })
             },
             getInstagramData(tag) {
+                this.instagramLoading = true
                 http.get('/getinstagramdata?tag=' + tag).then(response => {
-                    this.instagramContent = response.data;
+                    this.instagramLoading = false
+                    this.instagramContent = response.data
+                    this.instagramError = false
                 }).catch(() => {
-                    this.successStatus = 'Backend is not working'
+                    this.instagramLoading = false
+                    this.instagramError = true
                 })
             },
             ellipseText(text, limit) {
@@ -159,20 +184,21 @@
               return moment.unix(utcepoch).format('MMMM Do, YYYY h:mm A')
             },
             updateData() {
-                const tumblrTag = localStorage.getItem('tumblrTag')
-                const twitterTag = localStorage.getItem('twitterTag')
-                const instagramTag = localStorage.getItem('instagramTag')
-                if (tumblrTag) { this.getTumblrData(tumblrTag) }
-                if (twitterTag) { this.getTwitterData(twitterTag) }
-                if (instagramTag) { this.getInstagramData(instagramTag) }
+                if (this.tumblrTagInStorage) { this.getTumblrData(this.tumblrTagInStorage) }
+                if (this.twitterTagInStorage) { this.getTwitterData(this.twitterTagInStorage) }
+                if (this.instagramTagInStorage) { this.getInstagramData(this.instagramTagInStorage) }
             }
         },
         mounted: function () {
+            this.twitterTagInStorage = localStorage.getItem('twitterTag') || ''
+            this.tumblrTagInStorage = localStorage.getItem('tumblrTag') || ''
+            this.instagramTagInStorage = localStorage.getItem('instagramTag') || ''
+
             this.updateData()
             setInterval(function () {
                 // Every 10 seconds
                 this.updateData()
-            }.bind(this), 60000);
+            }.bind(this), 20000);
         }
     }
 </script>
@@ -180,6 +206,7 @@
 <style scoped>
     .sm-containers {
         padding-top: 32px;
+        padding-bottom: 32px;
     }
 
     a.white-href:link {

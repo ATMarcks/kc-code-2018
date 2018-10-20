@@ -141,7 +141,7 @@ app.get('/api/gettumblrdata', (req, res) => {
             res.status(200).send({
                 'success': true,
                 'semanticScore': semanticAnalysisTumblr.scoreSum/ semanticAnalysisTumblr.samples,
-                'blogs': tumblrPosts.sort(() => .5 - Math.random()).slice(0,9)
+                'blogs': tumblrPosts.sort(() => .5 - Math.random()).slice(0,9) || []
             });
         });
     }).on('error', (err) => {
@@ -181,7 +181,7 @@ app.get('/api/getinstagramdata', (req, res) => {
 
         res.status(200).send({
             'success': true,
-            'posts': posts.sort(() => .5 - Math.random()).slice(0,9),
+            'posts': posts.sort(() => .5 - Math.random()).slice(0,9) || [],
             'semanticScore': semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples,
         });
     }).catch(err => {
@@ -207,11 +207,15 @@ function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTwee
         semanticAnalysisTwitter.samples += 1;
         semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
     });
-    res.status(200).send({
-        'success': true,
-        'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
-        'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9)
-    })
+    try {
+        res.status(200).send({
+            'success': true,
+            'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
+            'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9) || []
+        })
+    } catch(ex) {
+        //Pass
+    }
 }
 
 app.listen(port);
