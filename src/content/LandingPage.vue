@@ -6,8 +6,9 @@
                 <a v-if="!cogToggled" v-on:click="settingsOpened()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
                 <div v-if="cogToggled">
                     <b-row style="width: 100%; float: right;">
-                        <b-col style="margin-right: 12px;">
-                            <input type="checkbox"> Same tags
+                        <b-col style="margin-top: 8px;">
+                            <input type="checkbox" id="tagCheckbox" name="useAllTag" v-model="sameTagsForAllCheck" v-on:click="sameTagsCheckF($event)"/>
+                            <label for="tagCheckbox">Same tag for all</label>
                         </b-col>
                         <b-col style="margin-right: 12px;">
                             <b-input-group>
@@ -111,6 +112,7 @@
                 twitterTagInStorage: '', // These three reflect the tags in storage
                 tumblrTagInStorage: '',
                 instagramTagInStorage: '',
+                sameTagsForAllCheck: false,
                 instagramError: false,
                 twitterError: false,
                 tumblrError: false,
@@ -188,6 +190,9 @@
             formatTime(utcepoch) {
               return moment.unix(utcepoch).format('MMMM Do, YYYY h:mm A')
             },
+            sameTagsCheckF(event) {
+                if (event.target.checked) this.twitterTag = this.tumblrTag = this.instagramTag = ''
+            },
             updateData() {
                 if (this.tumblrTagInStorage) { this.getTumblrData(this.tumblrTagInStorage) }
                 if (this.twitterTagInStorage) { this.getTwitterData(this.twitterTagInStorage) }
@@ -204,6 +209,17 @@
                 // Every 10 seconds
                 this.updateData()
             }.bind(this), 20000);
+        },
+        watch: {
+            twitterTag: function (newTag) {
+                if (this.sameTagsForAllCheck) this.tumblrTag = this.instagramTag = newTag;
+            },
+            tumblrTag: function (newTag) {
+                if (this.sameTagsForAllCheck) this.twitterTag = this.instagramTag = newTag;
+            },
+            instagramTag: function (newTag) {
+                if (this.sameTagsForAllCheck) this.twitterTag = this.tumblrTag = newTag;
+            }
         }
     }
 </script>
