@@ -1,7 +1,11 @@
 let express = require('express')
 let history = require('connect-history-api-fallback')
 let path = require('path')
+let http = require('http');
+let scrapeTwitter = require('scrape-twitter')
 let port = process.env.PORT || 80
+
+let unreadTweets = [];
 
 let app = express()
 
@@ -29,5 +33,18 @@ app.get('/api/test', (req, res) => {
         JSON.stringify({ 'str': 'success' })
     )
 })
+
+app.get('/api/gettwitterdata', (req, res) => {
+    const hashtag = req.query.hashtag;
+    let tweets = new scrapeTwitter.TweetStream('#' + hashtag, 'latest', 50);
+
+    tweets.on('data', (chunk) => {
+        console.log(chunk);
+        // writable.write(chunk);
+    });
+
+    let read = tweets.read();
+    console.log(read);
+});
 
 app.listen(port)

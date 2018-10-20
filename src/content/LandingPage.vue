@@ -1,7 +1,25 @@
 <template>
     <div>
-        <div>If you see "success" below, then the app is running correctly:</div><br />
-        <div>{{ successStatus }}</div>
+        <b-navbar toggleable="md" style="margin-bottom: 24px;" type="dark" variant="info">Test</b-navbar>
+        <b-container>
+            <b-row>
+                <b-col>
+                    <b-jumbotron header="Twitter" class="sm-containers">
+                        <p>twitter content here</p>
+                    </b-jumbotron>
+                </b-col>
+                <b-col>
+                    <b-jumbotron header="Facebook" class="sm-containers">
+                        <p>twitter content here</p>
+                    </b-jumbotron>
+                </b-col>
+                <b-col>
+                    <b-jumbotron header="Whatever is easy" class="sm-containers">
+                        <p>twitter content here</p>
+                    </b-jumbotron>
+                </b-col>
+            </b-row>
+        </b-container>
     </div>
 </template>
 
@@ -12,19 +30,25 @@ export default {
   name: "LandingPage",
   data () {
     return {
-      successStatus: ''
+      twitterHashtag: ''
     }
   },
+  methods: {
+      getTwitterData (hashtag) {
+          http.get('/gettwitterdata?hashtag=' + hashtag).then(response => {
+              this.successStatus = response.data
+          }).catch(() => {
+              this.successStatus = 'Backend is not working'
+          })
+      }
+  },
   mounted () {
-    http.get('/test/').then(response => {
-      this.successStatus = response.data.str
-     }).catch(() => {
-       this.successStatus = 'Backend is not working'
-     })
-  }
+  },
 }
 </script>
 
 <style scoped>
-
+.sm-containers {
+    padding-top: 32px;
+}
 </style>
