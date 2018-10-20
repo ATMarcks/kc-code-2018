@@ -3,45 +3,53 @@
         <b-navbar toggleable="md" style="margin-bottom: 0px;" variant="dark">
             <b-navbar-brand style="color: white">Sentiment</b-navbar-brand>
             <b-navbar-nav class="ml-auto" style="color: white;  margin-left: 0px;">
-                <a v-if="!cogToggled" v-on:click="settingsOpened()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
-                <div v-if="cogToggled">
-                    <b-row style="width: 100%; float: right;">
-                        <b-col>
-                            <b-input-group>
-                                <span style="padding-right: 12px; padding-top: 8px;">Refresh Rate</span>
-                                <b-form-input v-model="refreshRate" type="number" min="5"/>
-                            </b-input-group>
-                        </b-col>
-                        <b-col style="padding-top: 8px; margin-right: -40px; border-left-style: solid;">
-                            <input type="checkbox" id="tagCheckbox" name="useAllTag" v-model="sameTagsForAllCheck" v-on:click="sameTagsCheckF($event)"/>
-                            <label for="tagCheckbox">&nbsp;&nbsp;Same tag for all</label>
-                        </b-col>
-                        <b-col style="margin-right: 12px;">
-                            <b-input-group>
-                                <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'instagram' }"/>
-                                <b-form-input v-model="instagramTag" placeholder="Hashtag" type="text" />
-                            </b-input-group>
-                        </b-col>
-                        <b-col style="margin-right: 12px;">
-                            <b-input-group>
-                                <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'twitter' }"/>
-                                <b-form-input v-model="twitterTag" placeholder="Hashtag" type="text" />
-                            </b-input-group>
-                        </b-col>
-                        <b-col  style="padding-right: 12px; border-right-style: solid;">
-                            <b-input-group>
-                                <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'tumblr' }"/>
-                                <b-form-input v-model="tumblrTag" placeholder="Hashtag" type="text" />
-                            </b-input-group>
-                        </b-col>
-                        <b-col>
-                            <b-button style="width: 100%" v-on:click="saveHashtags" variant="success">Save</b-button>
-                        </b-col>
-                        <b-col>
-                            <b-button v-on:click="settingsCancelled" style="width: 100%" variant="danger">Cancel</b-button>
-                        </b-col>
-                    </b-row>
-                </div>
+                <transition name="custom-classes-tran" enter-active-class="animated fadeInRight">
+                    <a v-if="!cogToggledOn" v-on:click="setDelay()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
+                </transition>
+                <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
+                <transition
+                            name="custom-classes-transition"
+                            enter-active-class="animated fadeInRight"
+                            leave-active-class="animated fadeOutRight">
+                        <div v-if="cogToggled">
+                            <b-row style="width: 100%; float: right;">
+                                <b-col>
+                                    <b-input-group>
+                                        <span style="padding-right: 12px; padding-top: 8px;">Refresh Rate</span>
+                                        <b-form-input v-model="refreshRate" type="number" min="5"/>
+                                    </b-input-group>
+                                </b-col>
+                                <b-col style="padding-top: 8px; margin-right: -40px; border-left-style: solid;">
+                                    <input type="checkbox" id="tagCheckbox" name="useAllTag" v-model="sameTagsForAllCheck" v-on:click="sameTagsCheckF($event)"/>
+                                    <label for="tagCheckbox">&nbsp;&nbsp;Same tag for all</label>
+                                </b-col>
+                                <b-col style="margin-right: 12px;">
+                                    <b-input-group>
+                                        <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'instagram' }"/>
+                                        <b-form-input v-model="instagramTag" placeholder="Hashtag" type="text" />
+                                    </b-input-group>
+                                </b-col>
+                                <b-col style="margin-right: 12px;">
+                                    <b-input-group>
+                                        <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'twitter' }"/>
+                                        <b-form-input v-model="twitterTag" placeholder="Hashtag" type="text" />
+                                    </b-input-group>
+                                </b-col>
+                                <b-col  style="padding-right: 12px; border-right-style: solid;">
+                                    <b-input-group>
+                                        <font-awesome-icon size="2x" style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'tumblr' }"/>
+                                        <b-form-input v-model="tumblrTag" placeholder="Hashtag" type="text" />
+                                    </b-input-group>
+                                </b-col>
+                                <b-col>
+                                    <b-button style="width: 100%" v-on:click="setDelaySave" variant="success">Save</b-button>
+                                </b-col>
+                                <b-col>
+                                    <b-button v-on:click="setDelayCancel" style="width: 100%" variant="danger">Cancel</b-button>
+                                </b-col>
+                            </b-row>
+                        </div>
+                    </transition>
             </b-navbar-nav>
         </b-navbar>
         <b-container style="padding: 30px;" fluid> <!-- add margins here for more space -->
@@ -124,6 +132,7 @@
         data() {
             return {
                 cogToggled: false,
+                cogToggledOn: false,
                 twitterTag: '', // These three vars are for the views
                 tumblrTag: '',
                 instagramTag: '',
@@ -171,8 +180,24 @@
 
                 this.updateData()
             },
+            setDelay() {
+                this.cogToggledOn = true;
+                setTimeout(this.settingsOpened, 100);
+
+            },
+            setDelayCancel() {
+                this.settingsCancelled()
+                setTimeout(this.setCogToggle, 1050)
+            },
+            setDelaySave() {
+                this.saveHashtags()
+                setTimeout(this.setCogToggle, 1050)
+            },
+            setCogToggle() {
+                this.cogToggledOn = false
+            },
             settingsOpened() {
-                this.cogToggled = true
+                this.cogToggled = true;
                 this.twitterTag = localStorage.getItem('twitterTag') || ''
                 this.tumblrTag = localStorage.getItem('tumblrTag') || ''
                 this.instagramTag = localStorage.getItem('instagramTag') || ''
