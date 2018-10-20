@@ -1,6 +1,13 @@
 # kc-code-2018
 
-> For the Code-A-Thon 2018
+## Team
+
+Alex Marck
+Michael Zamora
+
+Joseph VonFeldt
+
+Robin Rice
 
 ## Build Setup
 
