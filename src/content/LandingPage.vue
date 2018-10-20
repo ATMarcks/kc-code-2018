@@ -65,7 +65,7 @@
                             <b-jumbotron class="inside-jumbo" v-for="instagramPost in instagramContent.posts">
                                 <em>{{ ellipseText(instagramPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(instagramPost.time) }}
-                                <span style="float: right;">&nbsp;<a v-bind:href="'https://www.instagram.com/p/'+instagramPost.shortcode+'/'">[link]</a></span>
+                                <span style="float: right;">[Likes: {{instagramPost.edge_liked_by}}]&nbsp;<a v-bind:href="'https://www.instagram.com/p/'+instagramPost.shortcode+'/'">[link]</a></span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
@@ -81,7 +81,7 @@
                             <b-jumbotron class="inside-jumbo" v-for="twitterPost in twitterContent.tweets">
                                 <em>{{ ellipseText(twitterPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(twitterPost.time) }}
-                                <span style="float: right;">&nbsp;<a v-bind:href="'https://twitter.com/'+ twitterPost.screenName+'/status/'+twitterPost.id">[link]</a></span>
+                                <span style="float: right;">[Retweets: {{twitterPost.retweetCount}}, Likes: {{twitterPost.favoriteCount}}]&nbsp;<a v-bind:href="'https://twitter.com/'+ twitterPost.screenName+'/status/'+twitterPost.id">[link]</a></span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
@@ -97,7 +97,7 @@
                             <b-jumbotron class="inside-jumbo" v-for="tumblrPost in tumblrContent.blogs">
                                 <em>{{ ellipseText(tumblrPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(tumblrPost.time) }}
-                                <span style="float: right;">&nbsp;<a v-bind:href="tumblrPost.short_url">[link]</a></span>
+                                <span style="float: right;">[Notes: {{tumblrPost.note_count}}]&nbsp;<a v-bind:href="tumblrPost.short_url">[link]</a></span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
