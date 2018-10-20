@@ -173,13 +173,15 @@ app.get('/api/getinstagramdata', (req, res) => {
         let posts = [];
 
         postsPreParse.forEach(post => {
-            if (!checkIfSubstrInStr(post.node.edge_media_to_caption.edges[0].node.text || '', exclude)) {
-                posts.push({
-                    'time': post.node.taken_at_timestamp,
-                    'text': post.node.edge_media_to_caption.edges[0].node.text || '',
-                    'shortcode': post.node.shortcode,
-                    'edge_liked_by': post.node.edge_liked_by.count
-                });
+            if ('node' in post && 'edge_media_to_caption' in post.node && 'edges' in post.node.edge_media_to_caption && post.node.edge_media_to_caption.edges.length !== 0) {
+                if (!checkIfSubstrInStr(post.node.edge_media_to_caption.edges[0].node.text || '', exclude)) {
+                    posts.push({
+                        'time': post.node.taken_at_timestamp,
+                        'text': post.node.edge_media_to_caption.edges[0].node.text || '',
+                        'shortcode': post.node.shortcode,
+                        'edge_liked_by': post.node.edge_liked_by.count
+                    });
+                }
             }
         });
 
@@ -195,6 +197,7 @@ app.get('/api/getinstagramdata', (req, res) => {
             'semanticScore': semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples,
         });
     }).catch(err => {
+        console.log('instagram error: ' + err);
         res.status(500).send({
             'success': false,
             'message': 'Failed to connect to Instagram'
