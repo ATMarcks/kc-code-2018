@@ -57,6 +57,7 @@
                             <b-jumbotron class="inside-jumbo" v-for="instagramPost in instagramContent.posts">
                                 <em>{{ ellipseText(instagramPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(instagramPost.time) }}
+                                <span style="float: right;">&nbsp;<a v-bind:href="'https://www.instagram.com/p/'+instagramPost.shortcode+'/'">[link]</a></span>
                             </b-jumbotron>
                         </div>
                     </b-jumbotron>
