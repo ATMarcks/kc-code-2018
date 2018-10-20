@@ -66,7 +66,7 @@
                     <b-jumbotron class="sm-containers">
                         <h1>
                             <font-awesome-icon style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'instagram' }"/>
-                            Instagram <span style="color: darkgray; font-size: 36px; float: right;"><em>#{{ instagramTagInStorage }}</em></span>
+                            Instagram <span style="color: darkgray; font-size: 36px;"><em>#{{ instagramTagInStorage }}</em></span>
                         </h1>
                         <hr/>
                         <div v-if="instagramLoading && instagramContent.posts.length === 0"><em>&nbsp;Fetching data...</em></div>
@@ -85,7 +85,7 @@
                     <b-jumbotron class="sm-containers">
                         <h1>
                             <font-awesome-icon style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'twitter' }"/>
-                            Twitter <span style="color: darkgray; font-size: 36px; float: right;"><em>#{{ twitterTagInStorage }}</em></span>
+                            Twitter <span style="color: darkgray; font-size: 36px;"><em>#{{ twitterTagInStorage }}</em></span>
                         </h1>
                         <hr/>
                         <div v-if="twitterLoading && twitterContent.tweets.length === 0"><em>&nbsp;Fetching Data...</em></div>
@@ -104,7 +104,7 @@
                     <b-jumbotron class="sm-containers" v-for="">
                         <h1>
                             <font-awesome-icon style="float: left; margin-right: 7px; margin-top: 2px;" :icon="{ prefix: 'fab', iconName: 'tumblr' }"/>
-                            Tumblr  <span style="color: darkgray; font-size: 36px; float: right;"><em>#{{ tumblrTagInStorage }}</em></span></h1>
+                            Tumblr  <span style="color: darkgray; font-size: 36px;"><em>#{{ tumblrTagInStorage }}</em></span></h1>
                         <hr/>
                         <div v-if="tumblrLoading && tumblrContent.blogs.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="tumblrContent.blogs.length === 0"><em>&nbsp;No results found</em></div>
@@ -307,6 +307,6 @@
     }
 
     h1 {
-        font-size: 80px;
+        font-size: 60px;
     }
 </style>
