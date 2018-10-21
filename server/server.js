@@ -130,6 +130,8 @@ app.get('/api/gettumblrdata', (req, res) => {
             resJson += body;
         });
 
+        let note_count = 0;
+
         resp.on('end', () => {
             let resObj = JSON.parse(resJson);
             resObj.response.forEach(post => {
@@ -143,11 +145,15 @@ app.get('/api/gettumblrdata', (req, res) => {
                     const senRes = sentiment.analyze((post.body || '').replace('#', ''));
                     semanticAnalysisTumblr.samples += 1;
                     semanticAnalysisTumblr.scoreSum += (senRes.score + 5) * 10;
+                    note_count += post.note_count;
                 }
             });
 
+            let averageNoteCount = Math.round(note_count / tumblrPosts.length * 100) / 100;
+
             res.status(200).send({
                 'success': true,
+                'averageNotes': averageNoteCount,
                 'semanticScore': semanticAnalysisTumblr.scoreSum/ semanticAnalysisTumblr.samples,
                 'blogs': tumblrPosts.sort(() => .5 - Math.random()).slice(0,9) || []
             });
@@ -171,6 +177,7 @@ app.get('/api/getinstagramdata', (req, res) => {
     Instagram.searchBy('hashtag', tag).then(r => {
         const postsPreParse = r.entry_data.TagPage[0].graphql.hashtag.edge_hashtag_to_media.edges;
         let posts = [];
+        let numberOfLikes = 0;
 
         postsPreParse.forEach(post => {
             if ('node' in post && 'edge_media_to_caption' in post.node && 'edges' in post.node.edge_media_to_caption && post.node.edge_media_to_caption.edges.length !== 0) {
@@ -181,6 +188,7 @@ app.get('/api/getinstagramdata', (req, res) => {
                         'shortcode': post.node.shortcode,
                         'edge_liked_by': post.node.edge_liked_by.count
                     });
+                    numberOfLikes += post.node.edge_liked_by.count;
                 }
             }
         });
@@ -191,8 +199,11 @@ app.get('/api/getinstagramdata', (req, res) => {
             semanticAnalysisInstagram.scoreSum += (senRes.score + 5) * 10;
         });
 
+        let averageLikes = Math.round(numberOfLikes / posts.length * 100) / 100;
+
         res.status(200).send({
             'success': true,
+            'averageLikes': averageLikes,
             'posts': posts.sort(() => .5 - Math.random()).slice(0,9) || [],
             'semanticScore': semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples,
         });
@@ -215,14 +226,27 @@ function checkIfSubstrInStr(str, strArray) {
 function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res) {
     newTweetsStream.destroy();
     topTweetsStream.destroy();
+
+    let numberOfLikes = 0;
+    let numberOfRetweets = 0;
+
     unreadTweets.forEach(tweet => {
         const senRes = sentiment.analyze((tweet.text || '').replace('#', ''));
         semanticAnalysisTwitter.samples += 1;
         semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
+
+        numberOfLikes += tweet.favoriteCount;
+        numberOfRetweets += tweet.retweetCount;
     });
+
+    let averageLikes = Math.round(numberOfLikes / unreadTweets.length * 100) / 100;
+    let averageRetweets = Math.round(numberOfRetweets / unreadTweets.length * 100) / 100;
+
     try {
         res.status(200).send({
             'success': true,
+            'averageLikes': averageLikes,
+            'averageRetweets': averageRetweets,
             'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
             'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9) || []
         })

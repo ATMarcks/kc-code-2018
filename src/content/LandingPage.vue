@@ -1,14 +1,13 @@
 <template>
     <div style="width: 100%;">
         <b-navbar toggleable="md" style="margin-bottom: 0px;" variant="dark">
-            <b-navbar-brand style="color: white">Sentiment</b-navbar-brand>
+            <b-navbar-brand style="color: white"><font-awesome-icon icon="comments"/>&nbsp;&nbsp;Sentiment</b-navbar-brand>
             <b-navbar-nav class="ml-auto" style="color: white;  margin-left: 0px;">
                 <transition name="custom-classes-tran" enter-active-class="animated fadeInRight">
                     <a v-if="!cogToggledOn" v-on:click="setDelay()" class="white-href" href="javascript://"><font-awesome-icon icon="cog"/></a>
                 </transition>
                 <link href="https://cdn.jsdelivr.net/npm/animate.css@3.5.1" rel="stylesheet" type="text/css">
-                <transition
-                            name="custom-classes-transition"
+                <transition name="custom-classes-transition"
                             enter-active-class="animated fadeInRight"
                             leave-active-class="animated fadeOutRight">
                         <div v-if="cogToggled">
@@ -72,7 +71,18 @@
                         <div v-if="instagramLoading && instagramContent.posts.length === 0"><em>&nbsp;Fetching data...</em></div>
                         <div v-else-if="instagramContent.posts.length === 0"><em>&nbsp;No results found -- Instagram tags sometimes require correct capitalization</em></div>
                         <div v-else>
-                            <pie-chart  class="chart-inner" :data="[['Positive', instagramContent.semanticScore], ['Negative', 100 - instagramContent.semanticScore]]"></pie-chart>
+                            <b-row>
+                                <b-col>
+                                    <pie-chart  class="chart-inner" :data="[['Positive', instagramContent.semanticScore], ['Negative', 100 - instagramContent.semanticScore]]"></pie-chart>
+                                </b-col>
+                                <b-col>
+                                    <div>
+                                        <h2><strong>Average Likes</strong></h2>
+                                        &nbsp;&nbsp;&nbsp;<strong>{{ instagramContent.averageLikes }}</strong>
+                                        <hr />
+                                    </div>
+                                </b-col>
+                            </b-row>
                             <b-jumbotron class="inside-jumbo" v-for="instagramPost in instagramContent.posts">
                                 <em>{{ ellipseText(instagramPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(instagramPost.time) }}
@@ -91,7 +101,21 @@
                         <div v-if="twitterLoading && twitterContent.tweets.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="twitterContent.tweets.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
-                            <pie-chart class="chart-inner" :data="[['Positive', twitterContent.semanticScore], ['Negative', 100 - twitterContent.semanticScore]]"></pie-chart>
+                            <b-row>
+                                <b-col>
+                                    <pie-chart class="chart-inner" :data="[['Positive', twitterContent.semanticScore], ['Negative', 100 - twitterContent.semanticScore]]"></pie-chart>
+                                </b-col>
+                                <b-col>
+                                    <div>
+                                        <h2><strong>Average Likes</strong></h2>
+                                        &nbsp;&nbsp;&nbsp;<strong>{{ twitterContent.averageLikes }}</strong>
+                                        <hr />
+                                        <h2><strong>Average Retweets</strong></h2>
+                                        &nbsp;&nbsp;&nbsp;<strong>{{ twitterContent.averageRetweets }}</strong>
+                                        <hr />
+                                    </div>
+                                </b-col>
+                            </b-row>
                             <b-jumbotron class="inside-jumbo" v-for="twitterPost in twitterContent.tweets">
                                 <em>{{ ellipseText(twitterPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(twitterPost.time) }}
@@ -109,7 +133,18 @@
                         <div v-if="tumblrLoading && tumblrContent.blogs.length === 0"><em>&nbsp;Fetching Data...</em></div>
                         <div v-else-if="tumblrContent.blogs.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
-                            <pie-chart  class="chart-inner" :data="[['Positive', tumblrContent.semanticScore], ['Negative', 100 - tumblrContent.semanticScore]]"></pie-chart>
+                            <b-row>
+                                <b-col>
+                                    <pie-chart  class="chart-inner" :data="[['Positive', tumblrContent.semanticScore], ['Negative', 100 - tumblrContent.semanticScore]]"></pie-chart>
+                                </b-col>
+                                <b-col>
+                                    <div>
+                                        <h2><strong>Average Notes</strong></h2>
+                                        &nbsp;&nbsp;&nbsp;<strong>{{ tumblrContent.averageNotes }}</strong>
+                                        <hr />
+                                    </div>
+                                </b-col>
+                            </b-row>
                             <b-jumbotron class="inside-jumbo" v-for="tumblrPost in tumblrContent.blogs">
                                 <em>{{ ellipseText(tumblrPost.text, 120) }}</em><br /><br />
                                 {{ formatTime(tumblrPost.time) }}
