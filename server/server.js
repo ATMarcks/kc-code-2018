@@ -206,7 +206,6 @@ app.get('/api/getinstagramdata', (req, res) => {
             'semanticScore': calculateSemScore(semanticAnalysisInstagram.scoreSum, semanticAnalysisInstagram.samples),
         });
     }).catch(err => {
-        console.log('instagram error: ' + err);
         res.status(500).send({
             'success': false,
             'message': 'Failed to connect to Instagram'
@@ -267,12 +266,12 @@ function calculateSemScore(sum, samples) {
     const semScorePre = (sum / samples);
     let newSemScore = undefined;
     if (semScorePre > 50) {
-        newSemScore = Math.pow(((semScorePre - 50)/50), 1/9) * 100;
-    } else if (semScorePre < 50) {
-        newSemScore = (100 - Math.pow(((-(semScorePre - 100) - 50)/50), 1/9) * 100);
+        newSemScore = 50 + Math.sqrt(Math.sqrt((semScorePre - 50))*900);
     } else {
-        newSemScore = semScorePre;
+        newSemScore = 50 - Math.sqrt(Math.sqrt((50 - semScorePre))*900);
     }
+    if (newSemScore > 100) newSemScore = 100;
+    if (newSemScore < 0) newSemScore = 0;
     return newSemScore;
 }
 
