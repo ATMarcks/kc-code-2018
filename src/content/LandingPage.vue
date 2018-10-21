@@ -61,7 +61,7 @@
                 </b-jumbotron>
                 <b-jumbotron v-else style="margin-left: 15px; width: 100%;" class="sm-containers">
                     <h1>
-                        <font-awesome-icon  style="margin-right: 7px; margin-top: 5px;" icon="chart-bar"/>
+                        <font-awesome-icon style="margin-right: 7px; margin-top: 5px;" icon="chart-bar"/>
                         Aggregate <span style="color: darkgray; font-size: 36px;"><em>{{ '#' + Array.from(storedHashtagSet).join(', #') }}</em></span>
                     </h1>
                     <div v-if="aggregatePositiveScore !== -1">
@@ -70,7 +70,9 @@
                                 <pie-chart  class="chart-inner" :data="[['Positive', aggregatePositiveScore], ['Negative', 100 - aggregatePositiveScore]]"></pie-chart>
                             </b-col>
                             <b-col cols lg="9">
-                                <area-chart :data="multipleSeriesAggregate" ></area-chart>
+                                <div>
+                                    <area-chart id="arChart" v-if="msChartDisplayHack" :key="msChartDisplayHack" :data="multipleSeriesAggregateWatched" ></area-chart>
+                                </div>
                             </b-col>
                         </b-row>
                     </div>
@@ -180,6 +182,7 @@
 <script>
     import http from '../shared/http'
     import moment from 'moment'
+    import Vue from 'vue'
 
     export default {
         name: "LandingPage",
@@ -198,6 +201,7 @@
                 refreshRateInStorage: 20,
                 sameTagsForAllCheck: false,
                 instagramError: false,
+                msChartDisplayHack: true,
                 twitterError: false,
                 tumblrError: false,
                 instagramLoading: false,
@@ -208,9 +212,13 @@
                 instagramContent: { 'posts': [] },
                 aggregatePositiveScore: -1,
                 multipleSeriesAggregate: [
-                    {name: 'Workout', data: {'2017-01-01': 3, '2017-01-02': 4}},
-                    {name: 'Call parents', data: {'2017-01-01': 5, '2017-01-02': 3}}
+                    {name: 'Instagram', data: {}},
+                    {name: 'Twitter', data: {}},
+                    {name: 'Tumblr', data: {}},
+                    {name: 'Aggregate', data: {}}
                 ],
+                lastInstagramData: 0,
+                multipleSeriesAggregateWatched: [],
                 refresher: undefined
             }
         },
@@ -280,37 +288,40 @@
                 this.tumblrTag = localStorage.getItem('tumblrTag') || ''
                 this.instagramTag = localStorage.getItem('instagramTag') || ''
             },
-            getTwitterData(tag) {
+            async getTwitterData(tag) {
                 this.twitterLoading = true
-                http.get('/gettwitterdata?hashtag=' + tag).then(response => {
+                return http.get('/gettwitterdata?hashtag=' + tag).then(response => {
                     this.twitterContent = response.data
                     this.twitterError = false
                     this.twitterLoading = false
                     this.updateAggregate()
+                    return Promise.resolve(response.data.semanticScore);
                 }).catch(() => {
                     this.twitterError = true
                     this.twitterLoading = false
                 })
             },
-            getTumblrData(tag) {
+            async getTumblrData(tag) {
                 this.tumblrLoading = true
-                http.get('/gettumblrdata?tag=' + tag).then(response => {
+                return http.get('/gettumblrdata?tag=' + tag).then(response => {
                     this.tumblrContent = response.data
                     this.tumblrError = false
                     this.tumblrLoading = false
                     this.updateAggregate()
+                    return Promise.resolve(response.data.semanticScore);
                 }).catch(() => {
                     this.tumblrError = true
                     this.tumblrLoading = false
                 })
             },
-            getInstagramData(tag) {
+            async getInstagramData(tag) {
                 this.instagramLoading = true
-                http.get('/getinstagramdata?tag=' + tag).then(response => {
+                return http.get('/getinstagramdata?tag=' + tag).then(response => {
                     this.instagramLoading = false
                     this.instagramContent = response.data
                     this.instagramError = false
                     this.updateAggregate()
+                    return Promise.resolve(response.data.semanticScore);
                 }).catch(() => {
                     this.instagramLoading = false
                     this.instagramError = true
@@ -344,7 +355,6 @@
 
                 if (semanticCount > 0) {
                     this.aggregatePositiveScore = semanticTotal / semanticCount
-                    console.log(this.aggregatePositiveScore)
                 } else {
                     this.aggregatePositiveScore = -1
                 }
@@ -356,12 +366,78 @@
                 if (event.target.checked) this.twitterTag = this.tumblrTag = this.instagramTag = ''
             },
             updateData() {
-                // TODO: return a promise from each of these
-                // TODO: on resolution of all, add to array
-                const currentTime = moment().utc().format('YYYY-MM-DD hh:mm:ss UTC');
-                if (this.tumblrTagInStorage) { this.getTumblrData(this.tumblrTagInStorage) }
-                if (this.twitterTagInStorage) { this.getTwitterData(this.twitterTagInStorage) }
-                if (this.instagramTagInStorage) { this.getInstagramData(this.instagramTagInStorage) }
+                let promiseArr = []
+                let validArr = []
+
+                if (this.tumblrTagInStorage) {
+                    promiseArr.push(this.getTumblrData(this.tumblrTagInStorage))
+                    validArr.push('tumblr')
+                }
+
+                if (this.twitterTagInStorage) {
+                    promiseArr.push(this.getTwitterData(this.twitterTagInStorage))
+                    validArr.push('twitter')
+                }
+                if (this.instagramTagInStorage) {
+                    promiseArr.push(this.getInstagramData(this.instagramTagInStorage))
+                    validArr.push('instagram')
+                }
+
+                Promise.all(promiseArr).then((vals) => {
+                    let aggAvg = undefined;
+                    let aggSum = 0;
+                    let aggCount = 0;
+
+                    vals.forEach(val => {
+                        if (val) {
+                            aggCount++
+                            aggSum += val
+                        }
+                    })
+
+                    if (aggCount === 0) {
+                        aggAvg = 0
+                    } else {
+                        aggAvg = aggSum / aggCount
+                    }
+
+                    const instIndex = validArr.indexOf('instagram');
+                    if (instIndex > -1 && vals[instIndex] !== 0) {
+                        this.lastInstagramData = vals[instIndex]
+                    }
+
+                    const timeF = 'YY-MM-DD hh:mm:ss UTC'
+                    this.multipleSeriesAggregate.forEach((series, seriesIndex) => {
+                        // If we are on the tumblr series
+                        if (series.name === 'Tumblr') {
+                            // If a tumblr tag is present
+                            if (validArr.includes('tumblr')) {
+                                // Get the index in the return promise array of tumblr
+                                Vue.set(series.data, moment().utc().format(timeF), vals[validArr.indexOf('tumblr')] || 0)// Assuming we are writing in-place
+                            } else {
+                                Vue.set(series.data, moment().utc().format(timeF), 0)
+                            }
+                        } else if (series.name === 'Twitter') {
+                            if (validArr.includes('twitter')) {
+                                Vue.set(series.data, moment().utc().format(timeF), vals[validArr.indexOf('twitter')] || 0)
+                            } else {
+                                Vue.set(series.data, moment().utc().format(timeF), 0)
+                            }
+                        } else if (series.name === 'Instagram') {
+                            if (validArr.includes('instagram')) {
+                                Vue.set(series.data, moment().utc().format(timeF), vals[validArr.indexOf('instagram')] || 0)
+                            } else {
+                                Vue.set(series.data, moment().utc().format(timeF), 0)
+                            }
+                        } else if (series.name === 'Aggregate') {
+                            if (validArr.length !== 0) {
+                                Vue.set(series.data, moment().utc().format(timeF), aggAvg)
+                            } else {
+                                Vue.set(series.data, moment().utc().format(timeF), 0)
+                            }
+                        }
+                    })
+                });
             }
         },
         mounted: function () {
@@ -389,6 +465,20 @@
             },
             instagramTag: function (newTag) {
                 if (this.sameTagsForAllCheck) this.twitterTag = this.tumblrTag = newTag;
+            },
+            multipleSeriesAggregate:  {
+                handler: function (after, before) {
+                    if (Object.keys(this.multipleSeriesAggregate[0].data).length > 10) {
+                        this.multipleSeriesAggregate.forEach(platform => {
+                            const keys = Object.keys(platform.data)
+                            Vue.delete(platform.data, keys[0])
+                        })
+                    }
+                    this.multipleSeriesAggregateWatched = JSON.parse(JSON.stringify(this.multipleSeriesAggregate))
+                    this.msChartDisplayHack = false
+                    this.msChartDisplayHack = true
+                },
+                deep: true
             }
         }
     }

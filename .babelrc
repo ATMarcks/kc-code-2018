@@ -1,5 +1,7 @@
 {
   "presets": [
-    ["env", { "modules": false }]
+    ["env", { "targets": {
+      "node": "current"
+    } }]
   ]
 }
