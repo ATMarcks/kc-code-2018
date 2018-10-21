@@ -59,6 +59,25 @@
                         certain hashtag by social media users. Click on the cog on the top right to get started.</h3>
                     <p></p>
                 </b-jumbotron>
+                <b-jumbotron v-else style="margin-left: 15px; width: 100%;" class="sm-containers">
+                    <h1>
+                        <font-awesome-icon  style="margin-right: 7px; margin-top: 5px;" icon="chart-bar"/>
+                        Aggregate <span style="color: darkgray; font-size: 36px;"><em>{{ '#' + Array.from(storedHashtagSet).join(', #') }}</em></span>
+                    </h1>
+                    <div v-if="aggregatePositiveScore !== -1">
+                        <b-row>
+                            <b-col cols lg="3">
+                                <pie-chart  class="chart-inner" :data="[['Positive', aggregatePositiveScore], ['Negative', 100 - aggregatePositiveScore]]"></pie-chart>
+                            </b-col>
+                            <b-col cols lg="9">
+                                <area-chart :data="multipleSeriesAggregate" ></area-chart>
+                            </b-col>
+                        </b-row>
+                    </div>
+                    <div v-else>
+                        <em>Waiting for data...</em>
+                    </div>
+                </b-jumbotron>
             </b-row>
             <b-row style="width: 100%; margin-right: 0;">
                 <b-col v-if="instagramTagInStorage" col xl="4">
@@ -69,7 +88,7 @@
                         </h1>
                         <hr/>
                         <div v-if="instagramLoading && instagramContent.posts.length === 0"><em>&nbsp;Fetching data...</em></div>
-                        <div v-else-if="instagramContent.posts.length === 0"><em>&nbsp;No results found -- Instagram tags sometimes require correct capitalization</em></div>
+                        <div v-else-if="instagramContent.posts.length === 0"><em>&nbsp;No results found</em></div>
                         <div v-else>
                             <b-row>
                                 <b-col>
@@ -175,6 +194,7 @@
                 twitterTagInStorage: '', // These three reflect the tags in storage
                 tumblrTagInStorage: '',
                 instagramTagInStorage: '',
+                storedHashtagSet: new Set(),
                 refreshRateInStorage: 20,
                 sameTagsForAllCheck: false,
                 instagramError: false,
@@ -185,7 +205,12 @@
                 tumblrLoading: false,
                 twitterContent: { 'tweets': [] },
                 tumblrContent: { 'blogs': [] },
-                instagramContent: { 'posts': []},
+                instagramContent: { 'posts': [] },
+                aggregatePositiveScore: -1,
+                multipleSeriesAggregate: [
+                    {name: 'Workout', data: {'2017-01-01': 3, '2017-01-02': 4}},
+                    {name: 'Call parents', data: {'2017-01-01': 5, '2017-01-02': 3}}
+                ],
                 refresher: undefined
             }
         },
@@ -196,14 +221,25 @@
                 this.twitterTagInStorage = this.twitterTag
                 this.instagramTagInStorage = this.instagramTag
                 this.tumblrTagInStorage = this.tumblrTag
+
                 localStorage.setItem('twitterTag', this.twitterTag)
                 localStorage.setItem('tumblrTag', this.tumblrTag)
                 localStorage.setItem('instagramTag', this.instagramTag)
+
+                this.storedHashtagSet = new Set()
+                this.storedHashtagSet.add(this.twitterTagInStorage)
+                this.storedHashtagSet.add(this.tumblrTagInStorage)
+                this.storedHashtagSet.add(this.instagramTagInStorage)
+
                 if (isNaN(this.refreshRate)) {
                     this.refreshRate = 20
                 } else if (this.refreshRate < 5) {
                     this.refreshRate = 5
                 }
+
+                if (!this.twitterTagInStorage) this.twitterContent = { 'tweets': [] }
+                if (!this.instagramTagInStorage) this.instagramContent = { 'blogs': [] }
+                if (!this.tumblrTagInStorage) this.tumblrContent = { 'posts': [] }
 
                 this.refreshRateInStorage = this.refreshRate
                 localStorage.setItem('refreshRate', this.refreshRate.toString())
@@ -244,34 +280,37 @@
                 this.tumblrTag = localStorage.getItem('tumblrTag') || ''
                 this.instagramTag = localStorage.getItem('instagramTag') || ''
             },
-            getTwitterData(tag) {
+            async getTwitterData(tag) {
                 this.twitterLoading = true
                 http.get('/gettwitterdata?hashtag=' + tag).then(response => {
                     this.twitterContent = response.data
                     this.twitterError = false
                     this.twitterLoading = false
+                    this.updateAggregate()
                 }).catch(() => {
                     this.twitterError = true
                     this.twitterLoading = false
                 })
             },
-            getTumblrData(tag) {
+            async getTumblrData(tag) {
                 this.tumblrLoading = true
                 http.get('/gettumblrdata?tag=' + tag).then(response => {
                     this.tumblrContent = response.data
                     this.tumblrError = false
                     this.tumblrLoading = false
+                    this.updateAggregate()
                 }).catch(() => {
                     this.tumblrError = true
                     this.tumblrLoading = false
                 })
             },
-            getInstagramData(tag) {
+            async getInstagramData(tag) {
                 this.instagramLoading = true
                 http.get('/getinstagramdata?tag=' + tag).then(response => {
                     this.instagramLoading = false
                     this.instagramContent = response.data
                     this.instagramError = false
+                    this.updateAggregate()
                 }).catch(() => {
                     this.instagramLoading = false
                     this.instagramError = true
@@ -284,6 +323,32 @@
                     return text.substring(0, limit -1) + '...'
                 }
             },
+            updateAggregate() {
+                let semanticTotal = 0
+                let semanticCount = 0
+
+                if ('semanticScore' in this.instagramContent) {
+                    semanticCount++
+                    semanticTotal += this.instagramContent.semanticScore
+                }
+
+                if ('semanticScore' in this.tumblrContent) {
+                    semanticCount++
+                    semanticTotal += this.tumblrContent.semanticScore
+                }
+
+                if ('semanticScore' in this.twitterContent) {
+                    semanticCount++
+                    semanticTotal += this.twitterContent.semanticScore
+                }
+
+                if (semanticCount > 0) {
+                    this.aggregatePositiveScore = semanticTotal / semanticCount
+                    console.log(this.aggregatePositiveScore)
+                } else {
+                    this.aggregatePositiveScore = -1
+                }
+            },
             formatTime(utcepoch) {
               return moment.unix(utcepoch).format('MMMM Do, h:mm A')
             },
@@ -291,6 +356,9 @@
                 if (event.target.checked) this.twitterTag = this.tumblrTag = this.instagramTag = ''
             },
             updateData() {
+                // TODO: return a promise from each of these
+                // TODO: on resolution of all, add to array
+                const currentTime = moment().utc().format('YYYY-MM-DD hh:mm:ss UTC');
                 if (this.tumblrTagInStorage) { this.getTumblrData(this.tumblrTagInStorage) }
                 if (this.twitterTagInStorage) { this.getTwitterData(this.twitterTagInStorage) }
                 if (this.instagramTagInStorage) { this.getInstagramData(this.instagramTagInStorage) }
@@ -301,6 +369,11 @@
             this.tumblrTagInStorage = localStorage.getItem('tumblrTag') || ''
             this.instagramTagInStorage = localStorage.getItem('instagramTag') || ''
             this.refreshRateInStorage = parseInt(localStorage.getItem('refreshRate')) || 20
+
+            this.storedHashtagSet = new Set()
+            this.storedHashtagSet.add(this.twitterTagInStorage)
+            this.storedHashtagSet.add(this.tumblrTagInStorage)
+            this.storedHashtagSet.add(this.instagramTagInStorage)
 
             this.updateData()
             this.refresher = setInterval(function () {
