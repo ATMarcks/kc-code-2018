@@ -194,9 +194,11 @@ app.get('/api/getinstagramdata', (req, res) => {
         });
 
         posts.forEach(post => {
-            const senRes = sentiment.analyze((post.text || '').replace('#', ''));
-            semanticAnalysisInstagram.samples += 1;
-            semanticAnalysisInstagram.scoreSum += (senRes.score + 5) * 10;
+            if (post.text) {
+                const senRes = sentiment.analyze((post.text || '').replace('#', ''));
+                semanticAnalysisInstagram.samples += 1;
+                semanticAnalysisInstagram.scoreSum += (senRes.score + 5) * 10;
+            }
         });
 
         let averageLikes = Math.round(numberOfLikes / posts.length * 100) / 100;
