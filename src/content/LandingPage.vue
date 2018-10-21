@@ -41,7 +41,7 @@
                                     </b-input-group>
                                 </b-col>
                                 <b-col>
-                                    <b-button style="width: 100%" v-on:click="setDelaySave" variant="success">Save</b-button>
+                                    <b-button style="width: 100%" v-hotkey="keymap" v-on:click="setDelaySave" variant="success">Save</b-button>
                                 </b-col>
                                 <b-col>
                                     <b-button v-on:click="setDelayCancel" style="width: 100%" variant="danger">Cancel</b-button>
@@ -389,6 +389,14 @@
             },
             instagramTag: function (newTag) {
                 if (this.sameTagsForAllCheck) this.twitterTag = this.tumblrTag = newTag;
+            }
+        },
+        computed: {
+            keymap() {
+                return {
+                    'enter': this.setDelaySave,
+                    'esc': this.setDelayCancel
+                }
             }
         }
     }
