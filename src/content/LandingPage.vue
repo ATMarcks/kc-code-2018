@@ -186,7 +186,7 @@
 
     export default {
         name: "LandingPage",
-        data() {
+        data: function() {
             return {
                 cogToggled: false,
                 cogToggledOn: false,
