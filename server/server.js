@@ -17,6 +17,8 @@ let sentiment = new Sentiment();
 
 const exclude = ['win', 'giveaway', 'download']
 
+const k = 'c1J3ZGl2UzM3WjMwSkhNWGpLZXpPMFk1YXdDOTJPWDlURjJzUkhBbjFKRVQxSDREaUM=';
+
 // Allow CORS if in development
 // Serve static files if in prod
 if (process.env.NODE_ENV === 'development') {
@@ -118,7 +120,7 @@ app.get('/api/gettumblrdata', (req, res) => {
         'scoreSum': 0
     };
 
-    https.get('https://api.tumblr.com/v2/tagged?tag=' + tag + '&filter=text&api_key=sRwdivS37Z30JHMXjKezO0Y5awC92OX9TF2sRHAn1JET1H4DiC', (resp) => {
+    https.get('https://api.tumblr.com/v2/tagged?tag=' + tag + '&filter=text&api_key=' + (Buffer.from(k, 'base64')).toString('ascii'), (resp) => {
         resp.setEncoding('utf8');
         let resJson = '';
 
