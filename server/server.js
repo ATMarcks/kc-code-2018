@@ -2,17 +2,19 @@ let express = require('express');
 let history = require('connect-history-api-fallback');
 let path = require('path');
 let https = require('https');
+let Filter = require('bad-words');
 let instagram = require('instagram-nodejs-without-api');
 let Sentiment = require('sentiment');
 let scrapeTwitter = require('scrape-twitter');
 let port = process.env.PORT || 80;
 
 Instagram = new instagram();
+filter = new Filter();
 
 let app = express();
 let sentiment = new Sentiment();
 
-const exclude = ['win', 'giveaway']
+const exclude = ['win', 'giveaway', 'download']
 
 // Allow CORS if in development
 // Serve static files if in prod
@@ -120,8 +122,6 @@ app.get('/api/gettumblrdata', (req, res) => {
         'scoreSum': 0
     };
 
-    //consumer key: sRwdivS37Z30JHMXjKezO0Y5awC92OX9TF2sRHAn1JET1H4DiC
-    //key: w1ZXh8PpXMYGoZQplSLWfG58U22PQkzKOf63mfVEcyoKWa7Ci8
     https.get('https://api.tumblr.com/v2/tagged?tag=' + tag + '&filter=text&api_key=sRwdivS37Z30JHMXjKezO0Y5awC92OX9TF2sRHAn1JET1H4DiC', (resp) => {
         resp.setEncoding('utf8');
         let resJson = '';
@@ -151,11 +151,14 @@ app.get('/api/gettumblrdata', (req, res) => {
 
             let averageNoteCount = Math.round(note_count / tumblrPosts.length * 100) / 100;
 
+            let semScore = semanticAnalysisTumblr.scoreSum/ semanticAnalysisTumblr.samples;
+            if (semScore > 100) semScore = 100;
+            if (semScore < 0) semScore = 0;
             res.status(200).send({
                 'success': true,
                 'averageNotes': averageNoteCount,
-                'semanticScore': semanticAnalysisTumblr.scoreSum/ semanticAnalysisTumblr.samples,
-                'blogs': tumblrPosts.sort(() => .5 - Math.random()).slice(0,9) || []
+                'semanticScore': semScore,
+                'blogs': cleanText(tumblrPosts.sort(() => .5 - Math.random()).slice(0,9) || [])
             });
         });
     }).on('error', (err) => {
@@ -203,11 +206,14 @@ app.get('/api/getinstagramdata', (req, res) => {
 
         let averageLikes = Math.round(numberOfLikes / posts.length * 100) / 100;
 
+        let semScore = semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples;
+        if (semScore > 100) semScore = 100;
+        if (semScore < 0) semScore = 0;
         res.status(200).send({
             'success': true,
             'averageLikes': averageLikes,
-            'posts': posts.sort(() => .5 - Math.random()).slice(0,9) || [],
-            'semanticScore': semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples,
+            'posts': cleanText(posts.sort(() => .5 - Math.random()).slice(0,9) || []),
+            'semanticScore': semScore,
         });
     }).catch(err => {
         console.log('instagram error: ' + err);
@@ -244,17 +250,25 @@ function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTwee
     let averageLikes = Math.round(numberOfLikes / unreadTweets.length * 100) / 100;
     let averageRetweets = Math.round(numberOfRetweets / unreadTweets.length * 100) / 100;
 
+    let semScore = semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples;
+    if (semScore > 100) semScore = 100;
+    if (semScore < 0) semScore = 0;
     try {
         res.status(200).send({
             'success': true,
             'averageLikes': averageLikes,
             'averageRetweets': averageRetweets,
-            'semanticScore': semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples,
-            'tweets': unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9) || []
+            'semanticScore': semScore,
+            'tweets': cleanText(unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9) || [])
         })
     } catch(ex) {
         //Pass
     }
+}
+
+function cleanText(strObj) {
+    strObj.forEach(tweet => tweet.text = filter.clean(tweet.text));
+    return strObj;
 }
 
 app.listen(port);
