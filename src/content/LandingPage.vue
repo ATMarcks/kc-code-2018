@@ -62,7 +62,7 @@
                 <b-jumbotron v-else style="margin-left: 15px; width: 100%;" class="sm-containers">
                     <h1>
                         <font-awesome-icon style="margin-right: 7px; margin-top: 5px;" icon="chart-bar"/>
-                        Aggregate <span style="color: darkgray; font-size: 36px;"><em>{{ '#' + Array.from(storedHashtagSet).join(', #') }}</em></span>
+                        Aggregate <span style="color: darkgray; font-size: 36px;"><em>{{ '#' + Array.from(storedHashtagSet).filter(i => i !== '').join(', #') }}</em></span>
                     </h1>
                     <div v-if="aggregatePositiveScore !== -1">
                         <b-row>
@@ -71,7 +71,7 @@
                             </b-col>
                             <b-col cols lg="9">
                                 <div>
-                                    <area-chart id="arChart" v-if="msChartDisplayHack" :key="msChartDisplayHack" :data="multipleSeriesAggregateWatched" ></area-chart>
+                                    <area-chart ytitle="% Positive" id="arChart" v-if="msChartDisplayHack" :key="msChartDisplayHack" :data="multipleSeriesAggregateWatched" ></area-chart>
                                 </div>
                             </b-col>
                         </b-row>
