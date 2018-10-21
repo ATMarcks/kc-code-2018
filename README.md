@@ -31,6 +31,8 @@ With Sentiment a business can quickly get a real-time snapshot of
 public sentiment around a certain topic by typing in a hashtag. Our application also
 gives the user a subset of the social media posts that were used in the analysis so that tailored action can be taken.
 
+Video: https://www.youtube.com/watch?v=DO1knW9c-HU
+
 ## Build Setup
 
 ``` bash
@@ -41,6 +43,6 @@ npm install
 npm run dev
 
 # build and run for production with minification
-# may require additional privileges
+# may require additional privileges on linux
 npm run prod
 ```

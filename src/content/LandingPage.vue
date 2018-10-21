@@ -52,7 +52,7 @@
             </b-navbar-nav>
         </b-navbar>
         <b-container style="padding: 30px;" fluid> <!-- add margins here for more space -->
-            <b-row style="width: 100%; margin-right: 0;">
+            <b-row style="width: 100%">
                 <b-jumbotron v-if="!twitterTagInStorage && !tumblrTagInStorage && !instagramTagInStorage" style="margin-left: 15px; width: 100%;" class="sm-containers">
                     <h1>Welcome to Sentiment</h1>
                     <h3>Sentiment uses sentiment analysis to get the general positive and negative sentiment of a
@@ -81,7 +81,7 @@
                     </div>
                 </b-jumbotron>
             </b-row>
-            <b-row style="width: 100%; margin-right: 0;">
+            <b-row style="width: 100%;">
                 <b-col v-if="instagramTagInStorage" col xl="4">
                     <b-jumbotron class="sm-containers">
                         <h1>
