@@ -9,6 +9,9 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCog, faComments, faChartBar } from '@fortawesome/free-solid-svg-icons'
 import { faTwitterSquare, faInstagram, faTumblrSquare } from '@fortawesome/fontawesome-free-brands'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueHotkey from 'v-hotkey'
+
+Vue.use(VueHotkey)
 
 library.add(faCog)
 library.add(faComments)
