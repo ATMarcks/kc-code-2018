@@ -338,17 +338,17 @@
                 let semanticTotal = 0
                 let semanticCount = 0
 
-                if ('semanticScore' in this.instagramContent) {
+                if ('semanticScore' in this.instagramContent && this.instagramContent.posts.length !== 0) {
                     semanticCount++
                     semanticTotal += this.instagramContent.semanticScore
                 }
 
-                if ('semanticScore' in this.tumblrContent) {
+                if ('semanticScore' in this.tumblrContent && this.tumblrContent.blogs.length !== 0) {
                     semanticCount++
                     semanticTotal += this.tumblrContent.semanticScore
                 }
 
-                if ('semanticScore' in this.twitterContent) {
+                if ('semanticScore' in this.twitterContent && this.twitterContent.tweets.length !== 0) {
                     semanticCount++
                     semanticTotal += this.twitterContent.semanticScore
                 }
