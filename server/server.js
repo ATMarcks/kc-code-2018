@@ -3,6 +3,7 @@ let history = require('connect-history-api-fallback');
 let path = require('path');
 let https = require('https');
 let Filter = require('bad-words');
+let normalize = require('normalize-to-range')
 let instagram = require('instagram-nodejs-without-api');
 let Sentiment = require('sentiment');
 let scrapeTwitter = require('scrape-twitter');
@@ -51,11 +52,6 @@ app.get('/api/gettwitterdata', (req, res) => {
     let topTweets = new scrapeTwitter.TweetStream('#' + hashtag, 'top', 100);
     let newTweets = new scrapeTwitter.TweetStream('#' + hashtag, 'latest', 100);
 
-    let semanticAnalysisTwitter = {
-        'samples': 0,
-        'scoreSum': 0
-    };
-
     newTweets.on('data', (chunk) => {
         if (!checkIfSubstrInStr(chunk.text, exclude)) {
             unreadTweets.push({
@@ -69,21 +65,21 @@ app.get('/api/gettwitterdata', (req, res) => {
         }
 
         if (unreadTweets.length === 150) {
-            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, res);
         }
     });
 
     newTweets.on('end', () => {
         newTweetsEnd = true;
         if (topTweetsEnd) {
-            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, res);
         }
     });
 
     topTweets.on('end', () => {
         topTweetsEnd = true;
         if (newTweetsEnd) {
-            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, res);
         }
     });
 
@@ -108,7 +104,7 @@ app.get('/api/gettwitterdata', (req, res) => {
         }
 
         if (unreadTweets.length === 150) {
-            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res);
+            twitterParse(newTweets, topTweets, unreadTweets, unreadTweetsToShow, res);
         }
     });
 });
@@ -143,21 +139,18 @@ app.get('/api/gettumblrdata', (req, res) => {
                         'note_count': post.note_count
                     });
                     const senRes = sentiment.analyze((post.body || '').replace('#', ''));
-                    semanticAnalysisTumblr.samples += 1;
-                    semanticAnalysisTumblr.scoreSum += (senRes.score + 5) * 10;
+                    semanticAnalysisTumblr.samples++;
+                    semanticAnalysisTumblr.scoreSum += (senRes.comparative + 5) * 10;
                     note_count += post.note_count;
                 }
             });
 
             let averageNoteCount = Math.round(note_count / tumblrPosts.length * 100) / 100;
 
-            let semScore = semanticAnalysisTumblr.scoreSum/ semanticAnalysisTumblr.samples;
-            if (semScore > 100) semScore = 100;
-            if (semScore < 0) semScore = 0;
             res.status(200).send({
                 'success': true,
                 'averageNotes': averageNoteCount,
-                'semanticScore': semScore,
+                'semanticScore': calculateSemScore(semanticAnalysisTumblr.scoreSum, semanticAnalysisTumblr.samples),
                 'blogs': cleanText(tumblrPosts.sort(() => .5 - Math.random()).slice(0,9) || [])
             });
         });
@@ -199,21 +192,18 @@ app.get('/api/getinstagramdata', (req, res) => {
         posts.forEach(post => {
             if (post.text) {
                 const senRes = sentiment.analyze((post.text || '').replace('#', ''));
-                semanticAnalysisInstagram.samples += 1;
-                semanticAnalysisInstagram.scoreSum += (senRes.score + 5) * 10;
+                semanticAnalysisInstagram.samples++;
+                semanticAnalysisInstagram.scoreSum += (senRes.comparative + 5) * 10;
             }
         });
 
         let averageLikes = Math.round(numberOfLikes / posts.length * 100) / 100;
 
-        let semScore = semanticAnalysisInstagram.scoreSum/ semanticAnalysisInstagram.samples;
-        if (semScore > 100) semScore = 100;
-        if (semScore < 0) semScore = 0;
         res.status(200).send({
             'success': true,
             'averageLikes': averageLikes,
             'posts': cleanText(posts.sort(() => .5 - Math.random()).slice(0,9) || []),
-            'semanticScore': semScore,
+            'semanticScore': calculateSemScore(semanticAnalysisInstagram.scoreSum, semanticAnalysisInstagram.samples),
         });
     }).catch(err => {
         console.log('instagram error: ' + err);
@@ -231,17 +221,22 @@ function checkIfSubstrInStr(str, strArray) {
     return false;
 }
 
-function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTweetsToShow, semanticAnalysisTwitter, res) {
+function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTweetsToShow, res) {
     newTweetsStream.destroy();
     topTweetsStream.destroy();
 
     let numberOfLikes = 0;
     let numberOfRetweets = 0;
 
+    let semanticAnalysisTwitter = {
+        'samples': 0,
+        'scoreSum': 0
+    };
+
     unreadTweets.forEach(tweet => {
         const senRes = sentiment.analyze((tweet.text || '').replace('#', ''));
-        semanticAnalysisTwitter.samples += 1;
-        semanticAnalysisTwitter.scoreSum += (senRes.score + 5) * 10;
+        semanticAnalysisTwitter.samples++;
+        semanticAnalysisTwitter.scoreSum += (senRes.comparative + 5) * 10;
 
         numberOfLikes += tweet.favoriteCount;
         numberOfRetweets += tweet.retweetCount;
@@ -250,15 +245,12 @@ function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTwee
     let averageLikes = Math.round(numberOfLikes / unreadTweets.length * 100) / 100;
     let averageRetweets = Math.round(numberOfRetweets / unreadTweets.length * 100) / 100;
 
-    let semScore = semanticAnalysisTwitter.scoreSum/ semanticAnalysisTwitter.samples;
-    if (semScore > 100) semScore = 100;
-    if (semScore < 0) semScore = 0;
     try {
         res.status(200).send({
             'success': true,
             'averageLikes': averageLikes,
             'averageRetweets': averageRetweets,
-            'semanticScore': semScore,
+            'semanticScore': calculateSemScore(semanticAnalysisTwitter.scoreSum, semanticAnalysisTwitter.samples),
             'tweets': cleanText(unreadTweetsToShow.sort(() => .5 - Math.random()).slice(0,9) || [])
         })
     } catch(ex) {
@@ -269,6 +261,19 @@ function twitterParse(newTweetsStream, topTweetsStream, unreadTweets, unreadTwee
 function cleanText(strObj) {
     strObj.forEach(tweet => tweet.text = filter.clean(tweet.text));
     return strObj;
+}
+
+function calculateSemScore(sum, samples) {
+    const semScorePre = (sum / samples);
+    let newSemScore = undefined;
+    if (semScorePre > 50) {
+        newSemScore = Math.pow(((semScorePre - 50)/50), 1/9) * 100;
+    } else if (semScorePre < 50) {
+        newSemScore = (100 - Math.pow(((-(semScorePre - 100) - 50)/50), 1/9) * 100);
+    } else {
+        newSemScore = semScorePre;
+    }
+    return newSemScore;
 }
 
 app.listen(port);

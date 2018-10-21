@@ -34,7 +34,8 @@
     "chart.js": "^2.7.3",
     "vue-chartkick": "^0.5.0",
     "v-hotkey": "^0.2.3",
-    "bad-words": "^1.6.4"
+    "bad-words": "^1.6.4",
+    "normalize-to-range": "^2.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
