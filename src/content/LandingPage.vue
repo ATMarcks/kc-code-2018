@@ -280,7 +280,7 @@
                 this.tumblrTag = localStorage.getItem('tumblrTag') || ''
                 this.instagramTag = localStorage.getItem('instagramTag') || ''
             },
-            async getTwitterData(tag) {
+            getTwitterData(tag) {
                 this.twitterLoading = true
                 http.get('/gettwitterdata?hashtag=' + tag).then(response => {
                     this.twitterContent = response.data
@@ -292,7 +292,7 @@
                     this.twitterLoading = false
                 })
             },
-            async getTumblrData(tag) {
+            getTumblrData(tag) {
                 this.tumblrLoading = true
                 http.get('/gettumblrdata?tag=' + tag).then(response => {
                     this.tumblrContent = response.data
@@ -304,7 +304,7 @@
                     this.tumblrLoading = false
                 })
             },
-            async getInstagramData(tag) {
+            getInstagramData(tag) {
                 this.instagramLoading = true
                 http.get('/getinstagramdata?tag=' + tag).then(response => {
                     this.instagramLoading = false
