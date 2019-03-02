@@ -4,13 +4,13 @@
 
 _Thunderwolves @ Colorado State Unversity—Pueblo_
 
-Alex Marck
+Alex Marck — [@ATMarcks](https://github.com/ATMarcks)
 
-Michael Zamora
+Michael Zamora — [@mikezamora1998](https://github.com/mikezamora1998)
 
-Joseph VonFeldt
+Joseph VonFeldt — [@uchmn](https://github.com/uchmn)
 
-Robin Rice
+Robin Rice — [@RobinRice](https://github.com/RobinRice)
 
 ## Our Application
 
@@ -32,6 +32,10 @@ public sentiment around a certain topic by typing in a hashtag. Our application 
 gives the user a subset of the social media posts that were used in the analysis so that tailored action can be taken.
 
 Video: https://www.youtube.com/watch?v=DO1knW9c-HU
+
+## Acknolwedgements
+
+We placed [second](https://www.kansascityfed.org/en/publications/ten/articles/2018/summer2018/code-a-thon%20winners) at the Code-A-Thon. Thank you to the Kansas City Federal Reserve for hosting this competition; it was tons of fun and we give best wishes to the 2019 competitors.
 
 ## Build Setup
 
