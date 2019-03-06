@@ -17,7 +17,8 @@ let sentiment = new Sentiment();
 
 const exclude = ['win', 'giveaway', 'download']
 
-const k = 'c1J3ZGl2UzM3WjMwSkhNWGpLZXpPMFk1YXdDOTJPWDlURjJzUkhBbjFKRVQxSDREaUM=';
+// A tumblr API key, encoded in base64
+const k = '';
 
 // Allow CORS if in development
 // Serve static files if in prod
